@@ -374,6 +374,10 @@ export const Registration: React.FC = () => {
             addToast('O nome do responsável é obrigatório.', 'warning');
             return;
         }
+        if (!formState.guardian.cpf.trim() || formState.guardian.cpf.length < 14) {
+             addToast('O CPF do responsável é obrigatório e deve ser válido.', 'warning');
+             return;
+        }
         if (!formState.guardian.phone.trim() || formState.guardian.phone.length < 14) {
              addToast('Digite um telefone válido.', 'warning');
              return;

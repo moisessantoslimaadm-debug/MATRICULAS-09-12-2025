@@ -105,7 +105,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, value, onC
 };
 
 // --- Helper Functions ---
-const normalizeForFuzzy = (str: string) => {
+const normalizeForFuzzy = (str: string | null | undefined) => {
+  if (!str) return "";
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").trim();
 };
 
@@ -115,6 +116,16 @@ const formatShiftDisplay = (shift: string | undefined) => {
     if (s.includes('matutino')) return 'Manhã';
     if (s.includes('vespertino')) return 'Tarde';
     return shift;
+};
+
+// --- Helper for CPF Formatting ---
+const formatCPF = (value: string) => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+    .replace(/(-\d{2})\d+?$/, '$1');
 };
 
 // --- Admin School Form Modal ---
@@ -251,6 +262,10 @@ const AdminStudentFormModal: React.FC<AdminStudentFormModalProps> = ({ isOpen, s
     onSave(formData);
   };
 
+  const handleCpfChange = (field: 'cpf' | 'guardianCpf', value: string) => {
+      setFormData({ ...formData, [field]: formatCPF(value) });
+  };
+
   const schoolNames = schools.map(s => s.name);
 
   return (
@@ -268,8 +283,8 @@ const AdminStudentFormModal: React.FC<AdminStudentFormModalProps> = ({ isOpen, s
               <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value.toUpperCase() })} className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">CPF</label>
-              <input type="text" value={formData.cpf} onChange={e => setFormData({ ...formData, cpf: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+              <label className="block text-sm font-bold text-slate-700 mb-1">CPF Aluno</label>
+              <input type="text" value={formData.cpf} onChange={e => handleCpfChange('cpf', e.target.value)} maxLength={14} className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1">Data de Nascimento</label>
@@ -288,7 +303,7 @@ const AdminStudentFormModal: React.FC<AdminStudentFormModalProps> = ({ isOpen, s
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">CPF Responsável</label>
-                    <input type="text" value={formData.guardianCpf || ''} onChange={e => setFormData({ ...formData, guardianCpf: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="000.000.000-00" />
+                    <input type="text" value={formData.guardianCpf || ''} onChange={e => handleCpfChange('guardianCpf', e.target.value)} maxLength={14} className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="000.000.000-00" />
                 </div>
             </div>
 
@@ -386,8 +401,8 @@ export const AdminData: React.FC = () => {
   // Filters & Pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [schoolFilter, setSchoolFilter] = useState('Todas');
-  const [classFilter, setClassFilter] = useState('Todas'); // Class Filter
-  const [shiftFilter, setShiftFilter] = useState('Todos'); // Shift Filter
+  const [classFilter, setClassFilter] = useState('Todas'); 
+  const [shiftFilter, setShiftFilter] = useState('Todos'); 
   const [statusFilter, setStatusFilter] = useState('Todos'); 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -433,13 +448,22 @@ export const AdminData: React.FC = () => {
       return [...new Set(classes)].sort();
   }, [students]);
 
-  // --- Filtering Logic ---
+  // --- Filtering Logic (UPDATED) ---
   const filteredData = useMemo(() => {
     const normalizedSearch = normalizeForFuzzy(searchTerm);
 
     if (activeTab === 'students') {
         return students.filter(student => {
-            const matchesSearch = normalizeForFuzzy(student.name).includes(normalizedSearch) || (student.cpf || '').includes(searchTerm);
+            const studentCpf = (student.cpf || '').replace(/\D/g, '');
+            const guardianCpf = (student.guardianCpf || '').replace(/\D/g, '');
+            const searchClean = searchTerm.replace(/\D/g, '');
+
+            // Busca por Nome do Aluno, CPF do Aluno OU CPF do Responsável OU Nome do Responsável
+            const matchesSearch = 
+                normalizeForFuzzy(student.name).includes(normalizedSearch) || 
+                normalizeForFuzzy(student.guardianName || '').includes(normalizedSearch) ||
+                (searchClean.length > 0 && (studentCpf.includes(searchClean) || guardianCpf.includes(searchClean)));
+
             const matchesSchool = schoolFilter === 'Todas' || student.school === schoolFilter;
             const matchesStatus = statusFilter === 'Todos' || student.status === statusFilter;
             const matchesClass = classFilter === 'Todas' || student.className === classFilter;
@@ -665,6 +689,7 @@ export const AdminData: React.FC = () => {
   };
 
   const handleDownloadTemplate = () => {
+      // Updated CSV Template to include Guardian Data for full integrity
       const headers = "nome;nascimento;cpf;escola;status;turma;turno;transporte;deficiencia;responsavel;contato;cpf_responsavel";
       const sample = "JOAO SILVA;01/01/2015;000.000.000-00;ESCOLA EXEMPLO;Matriculado;TURMA A;Matutino;Sim;Nao;MARIA SILVA;(00) 00000-0000;000.000.000-00";
       const csvContent = `${headers}\n${sample}`;
@@ -672,7 +697,7 @@ export const AdminData: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `modelo_importacao_alunos.csv`);
+      link.setAttribute('download', `modelo_importacao_alunos_completo.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -751,7 +776,7 @@ export const AdminData: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input 
                     type="text" 
-                    placeholder={activeTab === 'students' ? "Buscar aluno..." : "Buscar escola..."}
+                    placeholder={activeTab === 'students' ? "Buscar aluno por Nome, CPF ou Responsável..." : "Buscar escola..."}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"

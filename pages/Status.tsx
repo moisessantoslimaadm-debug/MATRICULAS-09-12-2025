@@ -58,9 +58,14 @@ export const Status: React.FC = () => {
     const normalizedTerm = normalizeString(term); // Text normalization
 
     const found = students.filter(s => {
-      // 1. CPF Match (Compare numeric values)
+      // 1. CPF Match (Student OR Guardian) - Robust check
       const studentCpfClean = s.cpf ? s.cpf.replace(/\D/g, '') : '';
-      const matchesCpf = cleanTerm.length > 0 && studentCpfClean.includes(cleanTerm);
+      const guardianCpfClean = s.guardianCpf ? s.guardianCpf.replace(/\D/g, '') : '';
+      
+      const matchesCpf = cleanTerm.length > 0 && (
+          studentCpfClean.includes(cleanTerm) || 
+          guardianCpfClean.includes(cleanTerm)
+      );
 
       // 2. Protocol/Enrollment Match
       const enrollmentRaw = s.enrollmentId ? s.enrollmentId.toLowerCase() : '';
@@ -70,9 +75,10 @@ export const Status: React.FC = () => {
         (cleanTerm.length > 0 && enrollmentClean.includes(cleanTerm)) ||
         (s.id === term || s.id === cleanTerm);
       
-      // 3. Name Match
+      // 3. Name Match (Student OR Guardian)
       const studentNameNorm = normalizeString(s.name);
-      const matchesName = studentNameNorm.includes(normalizedTerm);
+      const guardianNameNorm = normalizeString(s.guardianName || '');
+      const matchesName = studentNameNorm.includes(normalizedTerm) || guardianNameNorm.includes(normalizedTerm);
 
       return matchesCpf || matchesProtocol || matchesName;
     });
@@ -237,7 +243,7 @@ export const Status: React.FC = () => {
                      <label className="block text-sm font-medium text-slate-700 mb-1">Buscar Aluno</label>
                      <input 
                       type="text" 
-                      placeholder="Nome, CPF ou Nº de Matrícula..." 
+                      placeholder="Nome Aluno, CPF Aluno, CPF Responsável ou Matrícula..." 
                       value={studentInput}
                       onChange={handleSearchInputChange}
                       className="w-full px-4 py-3 pl-11 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" 
