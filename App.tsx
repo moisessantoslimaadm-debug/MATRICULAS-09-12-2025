@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Registration } from './pages/Registration';
@@ -9,9 +8,9 @@ import { AdminData } from './pages/AdminData';
 import { Dashboard } from './pages/Dashboard';
 import { Reports } from './pages/Reports';
 import { NotFound } from './pages/NotFound';
-import { Login } from './pages/Login'; // Adicionado Import
+import { Login } from './pages/Login';
 import { ChatAssistant } from './components/ChatAssistant';
-import { HashRouter, Routes, Route, useLocation } from './router';
+import { HashRouter, Routes, Route, useLocation, useNavigate } from './router';
 import { DataProvider, useData } from './contexts/DataContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { LogProvider } from './contexts/LogContext'; 
@@ -70,12 +69,28 @@ const ScrollToTop = () => {
 
 const AppContent: React.FC = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { isLoading } = useData();
   
-  // Login é uma rota válida, mas não mostra navbar
+  // --- LÓGICA DE REDIRECIONAMENTO INICIAL (FORCE LOGIN) ---
+  useEffect(() => {
+    // Verifica se existe a "chave" de autenticação no navegador
+    const isAuth = sessionStorage.getItem('admin_auth') === 'true';
+    
+    // Se o usuário tentar acessar a raiz ('/') e NÃO estiver logado,
+    // redireciona imediatamente para a tela de Login.
+    // Isso garante que a aplicação sempre "abra" no login para novos acessos.
+    if (!isAuth && pathname === '/') {
+      navigate('/login');
+    }
+  }, [pathname, navigate]);
+  
   const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login'];
   const isNotFound = !validPaths.includes(pathname);
+  
+  // Oculta Navbar e Footer na tela de Login para dar foco total
   const isLoginPage = pathname === '/login';
+  const showLayout = !isNotFound && !isLoginPage;
 
   // Global Loading Screen
   if (isLoading) {
@@ -94,10 +109,6 @@ const AppContent: React.FC = () => {
       </div>
     );
   }
-
-  // Determine if Navbar/Footer/Chat should be shown
-  // Não mostra layout na página de login
-  const showLayout = !isNotFound && !isLoginPage;
 
   return (
     <>
