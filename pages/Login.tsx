@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from '../router';
 import { useToast } from '../contexts/ToastContext';
@@ -47,9 +48,9 @@ export const Login: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl grid md:grid-cols-2 gap-8 items-center">
+      <div className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 gap-8 items-center">
         
-        {/* Left Side: Public Access Hub */}
+        {/* Left Side: Public Access Hub (Desktop) */}
         <div className="text-white space-y-6 md:pr-8 animate-in slide-in-from-left-8 duration-700 hidden md:block">
             <div>
                 <h1 className="text-4xl font-bold mb-2">Portal da Educação</h1>
@@ -57,37 +58,37 @@ export const Login: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-                <p className="font-medium text-sm text-blue-200 uppercase tracking-wider">Acesso para Pais e Alunos</p>
+                <p className="font-medium text-sm text-blue-200 uppercase tracking-wider border-b border-blue-400/30 pb-2">Acesso para Pais e Alunos</p>
                 <div className="grid gap-3">
-                    <Link to="/registration" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm">
-                        <div className="bg-green-500/20 p-2 rounded-lg text-green-300 group-hover:text-green-200 group-hover:bg-green-500/30 transition">
+                    <Link to="/registration" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm shadow-lg">
+                        <div className="bg-green-500/20 p-3 rounded-lg text-green-300 group-hover:text-green-200 group-hover:bg-green-500/30 transition border border-green-500/30">
                             <FileText className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold">Realizar Matrícula</h3>
-                            <p className="text-xs text-blue-100">Solicite vaga para novos alunos</p>
+                            <h3 className="font-bold text-lg">Realizar Matrícula</h3>
+                            <p className="text-sm text-blue-100 opacity-80">Solicite vaga para novos alunos</p>
                         </div>
                         <ArrowRight className="h-5 w-5 ml-auto text-white/50 group-hover:translate-x-1 transition" />
                     </Link>
 
-                    <Link to="/status" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm">
-                        <div className="bg-blue-500/20 p-2 rounded-lg text-blue-300 group-hover:text-blue-200 group-hover:bg-blue-500/30 transition">
+                    <Link to="/status" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm shadow-lg">
+                        <div className="bg-blue-500/20 p-3 rounded-lg text-blue-300 group-hover:text-blue-200 group-hover:bg-blue-500/30 transition border border-blue-500/30">
                             <Search className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold">Consultar Protocolo</h3>
-                            <p className="text-xs text-blue-100">Verifique o status da solicitação</p>
+                            <h3 className="font-bold text-lg">Consultar Protocolo</h3>
+                            <p className="text-sm text-blue-100 opacity-80">Verifique o status da solicitação</p>
                         </div>
                         <ArrowRight className="h-5 w-5 ml-auto text-white/50 group-hover:translate-x-1 transition" />
                     </Link>
 
-                    <Link to="/schools" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm">
-                        <div className="bg-indigo-500/20 p-2 rounded-lg text-indigo-300 group-hover:text-indigo-200 group-hover:bg-indigo-500/30 transition">
+                    <Link to="/schools" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm shadow-lg">
+                        <div className="bg-indigo-500/20 p-3 rounded-lg text-indigo-300 group-hover:text-indigo-200 group-hover:bg-indigo-500/30 transition border border-indigo-500/30">
                             <School className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold">Ver Escolas</h3>
-                            <p className="text-xs text-blue-100">Conheça as unidades da rede</p>
+                            <h3 className="font-bold text-lg">Ver Escolas</h3>
+                            <p className="text-sm text-blue-100 opacity-80">Conheça as unidades da rede</p>
                         </div>
                         <ArrowRight className="h-5 w-5 ml-auto text-white/50 group-hover:translate-x-1 transition" />
                     </Link>
@@ -95,7 +96,7 @@ export const Login: React.FC = () => {
             </div>
         </div>
 
-        {/* Right Side: Admin Login */}
+        {/* Right Side: Admin Login Form */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
           {/* Header */}
           <div className="bg-slate-50 p-8 text-center border-b border-slate-100">
@@ -164,10 +165,19 @@ export const Login: React.FC = () => {
           {/* Footer Mobile Public Links */}
           <div className="md:hidden border-t border-slate-100 p-4 bg-slate-50">
              <p className="text-xs font-bold text-slate-400 uppercase text-center mb-3">Acesso Público</p>
-             <div className="flex justify-center gap-4">
-                <Link to="/registration" className="text-blue-600 text-sm font-medium hover:underline">Matrícula</Link>
-                <span className="text-slate-300">|</span>
-                <Link to="/status" className="text-blue-600 text-sm font-medium hover:underline">Protocolo</Link>
+             <div className="grid grid-cols-3 gap-2 text-center">
+                <Link to="/registration" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
+                    <div className="bg-green-100 p-1.5 rounded-full text-green-600"><FileText className="h-4 w-4"/></div>
+                    <span className="text-[10px] font-bold text-slate-600">Matrícula</span>
+                </Link>
+                <Link to="/status" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
+                    <div className="bg-blue-100 p-1.5 rounded-full text-blue-600"><Search className="h-4 w-4"/></div>
+                    <span className="text-[10px] font-bold text-slate-600">Protocolo</span>
+                </Link>
+                <Link to="/schools" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
+                    <div className="bg-indigo-100 p-1.5 rounded-full text-indigo-600"><School className="h-4 w-4"/></div>
+                    <span className="text-[10px] font-bold text-slate-600">Escolas</span>
+                </Link>
              </div>
           </div>
 

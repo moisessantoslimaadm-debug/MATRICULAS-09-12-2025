@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -79,7 +80,7 @@ const AppContent: React.FC = () => {
     
     // Se o usuário tentar acessar a raiz ('/') e NÃO estiver logado,
     // redireciona imediatamente para a tela de Login.
-    // Isso garante que a aplicação sempre "abra" no login para novos acessos.
+    // Isso transforma a tela de Login na "Home Page" pública/privada híbrida.
     if (!isAuth && pathname === '/') {
       navigate('/login');
     }
