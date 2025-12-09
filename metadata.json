@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Copy of CÓPIA PRINCIPAL DE MATRICULAS 09-12-2025",
+  "description": "Plataforma oficial para gestão de matrículas da rede municipal de ensino, com assistente virtual integrado.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
