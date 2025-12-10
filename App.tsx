@@ -73,16 +73,28 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useData();
   
-  // --- LÓGICA DE REDIRECIONAMENTO INICIAL (FORCE LOGIN) ---
+  // --- LÓGICA DE PROTEÇÃO DE ROTAS (SECURITY GUARD) ---
   useEffect(() => {
-    // Verifica se existe a "chave" de autenticação no navegador
     const isAuth = sessionStorage.getItem('admin_auth') === 'true';
     
-    // Se o usuário tentar acessar a raiz ('/') e NÃO estiver logado,
-    // redireciona imediatamente para a tela de Login.
-    // Isso transforma a tela de Login na "Home Page" pública/privada híbrida.
-    if (!isAuth && pathname === '/') {
-      navigate('/login');
+    // Lista de rotas públicas (acessíveis sem senha)
+    // O Login é a porta de entrada pública principal agora (Hub Híbrido)
+    const publicRoutes = ['/login', '/registration', '/status', '/schools'];
+    
+    // Verifica se a rota atual começa com alguma das rotas públicas
+    const isPublicPath = publicRoutes.some(route => pathname.startsWith(route));
+
+    if (!isAuth) {
+        // Cenário 1: Usuário acessa a Raiz ('/') -> Manda para o Login (Hub)
+        if (pathname === '/') {
+            navigate('/login');
+            return;
+        }
+
+        // Cenário 2: Usuário tenta acessar rota restrita (ex: /dashboard) sem logar -> Manda para Login
+        if (!isPublicPath) {
+            navigate('/login');
+        }
     }
   }, [pathname, navigate]);
   

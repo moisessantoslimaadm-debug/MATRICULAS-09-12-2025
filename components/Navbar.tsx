@@ -14,7 +14,6 @@ export const Navbar: React.FC = () => {
         setIsAuthenticated(sessionStorage.getItem('admin_auth') === 'true');
     };
     checkAuth();
-    // Listen to storage events or route changes if needed, simple check on render is enough for now
   }, [location.pathname]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -26,6 +25,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
+            {/* O logo vai para Home (que redireciona para Login se não logado) */}
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <GraduationCap className="h-6 w-6 text-white" />
@@ -35,18 +35,29 @@ export const Navbar: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className={isActive('/')}>Início</Link>
-            <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
-            <Link to="/reports" className={`${isActive('/reports')} flex items-center gap-1.5`} title="Visualizar Relatórios e Estatísticas">
-               <BarChart3 className="h-4 w-4" /> Relatórios
-            </Link>
+            {/* Link Início só aparece se logado, pois não logado redireciona para Login */}
+            {isAuthenticated && (
+                <Link to="/" className={isActive('/')}>Início</Link>
+            )}
+            
+            {/* Links Visíveis para Todos */}
             <Link to="/schools" className={isActive('/schools')}>Escolas</Link>
             <Link to="/registration" className={isActive('/registration')}>Matrícula</Link>
             <Link to="/status" className={isActive('/status')}>Protocolo</Link>
-            <Link to="/admin/data" className={`${isActive('/admin/data')} flex items-center gap-1 border border-slate-200 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-slate-100`}>
-              <Database className="h-3 w-3" />
-              <span className="text-sm">Gestão</span>
-            </Link>
+
+            {/* Links Restritos (Apenas Admin) */}
+            {isAuthenticated && (
+                <>
+                    <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+                    <Link to="/reports" className={`${isActive('/reports')} flex items-center gap-1.5`} title="Visualizar Relatórios e Estatísticas">
+                       <BarChart3 className="h-4 w-4" /> Relatórios
+                    </Link>
+                    <Link to="/admin/data" className={`${isActive('/admin/data')} flex items-center gap-1 border border-slate-200 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-slate-100`}>
+                      <Database className="h-3 w-3" />
+                      <span className="text-sm">Gestão</span>
+                    </Link>
+                </>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -59,7 +70,7 @@ export const Navbar: React.FC = () => {
              {/* Admin Login Shortcut */}
              <Link 
                to="/login" 
-               className={`hidden md:flex p-2 rounded-full transition ${isAuthenticated ? 'text-blue-600 bg-blue-50' : 'text-slate-400 hover:text-blue-600 hover:bg-slate-50'}`} 
+               className={`hidden md:flex p-2 rounded-full transition ${isAuthenticated ? 'text-blue-600 bg-blue-50 ring-2 ring-blue-100' : 'text-slate-400 hover:text-blue-600 hover:bg-slate-50'}`} 
                title={isAuthenticated ? "Logado como Admin" : "Acesso Administrativo"}
              >
                 <Lock className="h-4 w-4" />
@@ -81,22 +92,31 @@ export const Navbar: React.FC = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link to="/" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Início</Link>
-            <Link to="/dashboard" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link to="/reports" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Relatórios
-            </Link>
+            {isAuthenticated && (
+                <Link to="/" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Início</Link>
+            )}
+            
             <Link to="/schools" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Escolas</Link>
             <Link to="/registration" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Realizar Matrícula</Link>
             <Link to="/status" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Consultar Protocolo</Link>
-            <Link to="/admin/data" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Gestão de Dados
-            </Link>
+            
+            {isAuthenticated && (
+                <>
+                    <Link to="/dashboard" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <Link to="/reports" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Relatórios
+                    </Link>
+                    <Link to="/admin/data" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
+                      <Database className="h-4 w-4" />
+                      Gestão de Dados
+                    </Link>
+                </>
+            )}
+            
             <Link to="/login" onClick={toggleMenu} className={`block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${isAuthenticated ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-50'}`}>
               <Lock className="h-4 w-4" />
               {isAuthenticated ? 'Painel Admin (Logado)' : 'Login Admin'}
