@@ -5,7 +5,7 @@ import { useLog } from '../contexts/LogContext';
 import { useNavigate } from '../router';
 import { 
   FileSpreadsheet, Upload, Download, Search, ChevronLeft, ChevronRight, 
-  Trash2, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText, Lock
+  Trash2, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText, Lock, TrendingUp
 } from 'lucide-react';
 import { RegistryStudent, School, SchoolType } from '../types';
 
@@ -894,6 +894,15 @@ export const AdminData: React.FC = () => {
                                     </>
                                 )}
                                 <td className="px-6 py-3 text-right flex justify-end gap-2">
+                                    {activeTab === 'students' && (
+                                        <button 
+                                            onClick={() => navigate(`/performance?studentId=${item.id}`)}
+                                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded"
+                                            title="Ver Boletim / Indicadores"
+                                        >
+                                            <TrendingUp className="h-4 w-4" />
+                                        </button>
+                                    )}
                                     <button 
                                         onClick={() => {
                                             if (activeTab === 'students') {

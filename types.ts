@@ -85,6 +85,18 @@ export type MovementRow = {
   current: number;
 };
 
+// Data structure for Performance Header persistence
+export type PerformanceHeader = {
+  unit: string;
+  year: number;
+  shift: string;
+  director: string;
+  coordinator: string;
+  dateDay: string;
+  dateMonth: string;
+  dateYear: string;
+};
+
 // Updated interface for data extracted from PDF
 export interface RegistryStudent {
   id: string; // ID único do aluno
@@ -111,4 +123,5 @@ export interface RegistryStudent {
   // New fields for Individual Performance Report
   performanceHistory?: PerformanceRow[];
   movementHistory?: MovementRow[];
+  performanceHeader?: PerformanceHeader; // Persist header info
 }

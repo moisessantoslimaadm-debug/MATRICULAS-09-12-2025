@@ -3,7 +3,9 @@ import { Printer, ArrowLeft, TrendingUp, Save, Eraser, Calculator, UserCheck, Sc
 import { Link, useSearchParams, useNavigate } from '../router';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
-import { PerformanceRow, MovementRow, RegistryStudent } from '../types';
+import { PerformanceRow, MovementRow, RegistryStudent, PerformanceHeader } from '../types';
+
+// --- Constants ---
 
 const INITIAL_PERFORMANCE: PerformanceRow[] = [
   { subject: 'LÍNGUA PORTUGUESA', g1: ['','','','',''], g2: ['','','','',''], g3: ['','',''], g4: ['','',''], g5: ['','',''] },
@@ -23,19 +25,7 @@ const INITIAL_MOVEMENT: MovementRow[] = [
   { grade: '5º ANO', initial: 0, abandon: '-', transfer: 0, admitted: 0, current: 0 },
 ];
 
-export const PerformanceIndicators: React.FC = () => {
-  const { schools, students, addStudent, updateStudents } = useData();
-  const { addToast } = useToast();
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
-  const studentId = params.get('studentId');
-  
-  const [currentStudent, setCurrentStudent] = useState<RegistryStudent | null>(null);
-
-  // Header State
-  const [headerInfo, setHeaderInfo] = useState({
-    schoolName: '',
-    studentName: '',
+const INITIAL_HEADER: PerformanceHeader = {
     unit: 'II TRIMESTRE',
     year: new Date().getFullYear() + 1,
     shift: '',
@@ -44,31 +34,82 @@ export const PerformanceIndicators: React.FC = () => {
     dateDay: new Date().getDate().toString().padStart(2, '0'),
     dateMonth: (new Date().getMonth() + 1).toString().padStart(2, '0'),
     dateYear: (new Date().getFullYear() + 1).toString()
-  });
+};
 
-  // Table Data State
+// --- Helper Components ---
+
+// InputCell defined OUTSIDE to prevent focus loss re-rendering issues
+const InputCell = React.memo(({ 
+    value, 
+    onChange, 
+    className = "text-center", 
+    width = "w-full", 
+    placeholder = "",
+    type = "text"
+}: { 
+    value: string | number | undefined, 
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, 
+    className?: string, 
+    width?: string, 
+    placeholder?: string,
+    type?: "text" | "number"
+}) => (
+    <input 
+      type={type}
+      value={value ?? ''}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`bg-transparent outline-none border border-transparent hover:border-blue-200 focus:border-blue-500 focus:bg-blue-50 transition-colors p-0.5 text-inherit font-inherit ${width} ${className} print:border-none print:p-0 print:focus:bg-transparent placeholder:text-slate-300 print:placeholder:text-transparent appearance-none m-0 rounded-sm`}
+    />
+));
+
+// --- Main Component ---
+
+export const PerformanceIndicators: React.FC = () => {
+  const { schools, students, updateStudents } = useData();
+  const { addToast } = useToast();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const studentId = params.get('studentId');
+  
+  const [currentStudent, setCurrentStudent] = useState<RegistryStudent | null>(null);
+
+  // Local State
+  const [headerInfo, setHeaderInfo] = useState<PerformanceHeader>(INITIAL_HEADER);
   const [performanceData, setPerformanceData] = useState<PerformanceRow[]>(INITIAL_PERFORMANCE);
   const [movementData, setMovementData] = useState<MovementRow[]>(INITIAL_MOVEMENT);
+  const [tempSchoolName, setTempSchoolName] = useState('');
+  const [tempStudentName, setTempStudentName] = useState('');
 
-  // Load Student Data on Mount
+  // Load Student Data
   useEffect(() => {
       if (studentId) {
           const student = students.find(s => s.id === studentId);
           if (student) {
               setCurrentStudent(student);
-              setHeaderInfo(prev => ({
-                  ...prev,
-                  schoolName: student.school || '',
-                  studentName: student.name,
-                  shift: student.shift || '',
-              }));
+              setTempStudentName(student.name);
+              setTempSchoolName(student.school || '');
               
-              // Load saved history if exists, else defaults
-              if (student.performanceHistory && student.performanceHistory.length > 0) {
+              // Load saved history if exists
+              if (student.performanceHistory?.length) {
                   setPerformanceData(student.performanceHistory);
               }
-              if (student.movementHistory && student.movementHistory.length > 0) {
+              if (student.movementHistory?.length) {
                   setMovementData(student.movementHistory);
+              }
+              
+              // Load Saved Header Info or Merge with Defaults
+              if (student.performanceHeader) {
+                  setHeaderInfo(prev => ({
+                      ...prev,
+                      ...student.performanceHeader
+                  }));
+              } else {
+                  // If no saved header, try to populate from student basic data
+                  setHeaderInfo(prev => ({
+                      ...prev,
+                      shift: student.shift || prev.shift
+                  }));
               }
           } else {
               addToast("Aluno não encontrado.", 'error');
@@ -81,7 +122,7 @@ export const PerformanceIndicators: React.FC = () => {
   };
 
   const handleClear = () => {
-      if(confirm('Limpar todos os dados da tabela?')) {
+      if(confirm('Limpar todos os dados da tabela (notas e movimento)?')) {
           const clearedPerf = performanceData.map(row => ({
               ...row,
               g1: row.g1.map(() => ''), g2: row.g2.map(() => ''), g3: row.g3.map(() => ''), g4: row.g4.map(() => ''), g5: row.g5.map(() => '')
@@ -90,7 +131,7 @@ export const PerformanceIndicators: React.FC = () => {
           
           setPerformanceData(clearedPerf);
           setMovementData(clearedMov);
-          addToast('Dados limpos.', 'info');
+          addToast('Dados das tabelas limpos.', 'info');
       }
   };
 
@@ -104,12 +145,13 @@ export const PerformanceIndicators: React.FC = () => {
           ...currentStudent,
           performanceHistory: performanceData,
           movementHistory: movementData,
-          shift: headerInfo.shift
+          performanceHeader: headerInfo, // Save the header fields too
+          shift: headerInfo.shift // Update main shift as well
       };
 
       try {
           await updateStudents([updatedStudent]);
-          addToast("Histórico do aluno salvo com sucesso!", 'success');
+          addToast("Boletim salvo com sucesso!", 'success');
       } catch (error) {
           addToast("Erro ao salvar dados.", 'error');
           console.error(error);
@@ -174,34 +216,9 @@ export const PerformanceIndicators: React.FC = () => {
       const schoolId = e.target.value;
       const school = schools.find(s => s.id === schoolId);
       if (school) {
-          setHeaderInfo(prev => ({ ...prev, schoolName: school.name.toUpperCase() }));
+          setTempSchoolName(school.name.toUpperCase());
       }
   };
-
-  // Helper Input Cell
-  const InputCell = ({ 
-      value, 
-      onChange, 
-      className = "text-center", 
-      width = "w-full", 
-      placeholder = "",
-      type = "text"
-  }: { 
-      value: string | number, 
-      onChange: (e: any) => void, 
-      className?: string, 
-      width?: string, 
-      placeholder?: string,
-      type?: "text" | "number"
-  }) => (
-      <input 
-        type={type}
-        value={value ?? ''} // Safety check for null/undefined
-        onChange={onChange}
-        placeholder={placeholder}
-        className={`bg-transparent outline-none border border-transparent hover:border-blue-200 focus:border-blue-500 focus:bg-blue-50 transition-colors p-0.5 text-inherit font-inherit ${width} ${className} print:border-none print:p-0 print:focus:bg-transparent placeholder:text-slate-300 print:placeholder:text-transparent appearance-none m-0`}
-      />
-  );
 
   return (
     <div className="min-h-screen bg-slate-100 py-8 print:bg-white print:py-0">
@@ -221,14 +238,14 @@ export const PerformanceIndicators: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                     <button onClick={handleClear} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-medium">
-                        <Eraser className="h-4 w-4" /> Limpar
+                        <Eraser className="h-4 w-4" /> Limpar Tabelas
                     </button>
                     <button onClick={handleRecalculateMovement} className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium">
                         <Calculator className="h-4 w-4" /> Calcular
                     </button>
                     {currentStudent && (
                         <button onClick={handleSaveToStudent} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-sm">
-                            <Save className="h-4 w-4" /> Salvar no Aluno
+                            <Save className="h-4 w-4" /> Salvar Alterações
                         </button>
                     )}
                     <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-sm">
@@ -297,33 +314,33 @@ export const PerformanceIndicators: React.FC = () => {
                 <div className="grid grid-cols-12 text-xs divide-x divide-black border-b border-black">
                      <div className="col-span-12 p-1 pl-2 flex gap-1 border-b border-black">
                         <span className="font-bold whitespace-nowrap">ALUNO(A):</span>
-                        <InputCell value={headerInfo.studentName} onChange={(e: any) => setHeaderInfo({...headerInfo, studentName: e.target.value.toUpperCase()})} className="font-bold text-left" />
+                        <InputCell value={tempStudentName} onChange={(e) => setTempStudentName(e.target.value.toUpperCase())} className="font-bold text-left" />
                      </div>
                      <div className="col-span-6 p-1 pl-2 flex gap-1">
                         <span className="font-bold whitespace-nowrap">UNIDADE ESCOLAR:</span> 
-                        <InputCell value={headerInfo.schoolName} onChange={(e: any) => setHeaderInfo({...headerInfo, schoolName: e.target.value.toUpperCase()})} className="font-bold text-left" />
+                        <InputCell value={tempSchoolName} onChange={(e) => setTempSchoolName(e.target.value.toUpperCase())} className="font-bold text-left" />
                      </div>
                      <div className="col-span-3 p-1 pl-2 flex gap-1">
                         <span className="font-bold whitespace-nowrap">UNIDADE LETIVA:</span>
-                        <InputCell value={headerInfo.unit} onChange={(e: any) => setHeaderInfo({...headerInfo, unit: e.target.value.toUpperCase()})} />
+                        <InputCell value={headerInfo.unit} onChange={(e) => setHeaderInfo({...headerInfo, unit: e.target.value.toUpperCase()})} />
                      </div>
                      <div className="col-span-1 p-1 pl-2 text-center flex gap-1 justify-center">
                         <span className="font-bold">ANO:</span> {headerInfo.year}
                      </div>
                      <div className="col-span-2 p-1 pl-2 text-center flex gap-1 justify-center">
                         <span className="font-bold">TURNO:</span>
-                        <InputCell value={headerInfo.shift} onChange={(e: any) => setHeaderInfo({...headerInfo, shift: e.target.value.toUpperCase()})} />
+                        <InputCell value={headerInfo.shift} onChange={(e) => setHeaderInfo({...headerInfo, shift: e.target.value.toUpperCase()})} />
                      </div>
                 </div>
 
                 <div className="grid grid-cols-2 text-xs divide-x divide-black">
                      <div className="p-1 pl-2 flex gap-1">
                         <span className="font-bold whitespace-nowrap">GESTOR(A) ESCOLAR:</span>
-                        <InputCell value={headerInfo.director} onChange={(e: any) => setHeaderInfo({...headerInfo, director: e.target.value.toUpperCase()})} />
+                        <InputCell value={headerInfo.director} onChange={(e) => setHeaderInfo({...headerInfo, director: e.target.value.toUpperCase()})} placeholder="Nome do(a) Diretor(a)" className="text-left" />
                      </div>
                      <div className="p-1 pl-2 flex gap-1">
                         <span className="font-bold whitespace-nowrap">COORDENADOR(A) PEDAGÓGICO(A):</span>
-                        <InputCell value={headerInfo.coordinator} onChange={(e: any) => setHeaderInfo({...headerInfo, coordinator: e.target.value.toUpperCase()})} />
+                        <InputCell value={headerInfo.coordinator} onChange={(e) => setHeaderInfo({...headerInfo, coordinator: e.target.value.toUpperCase()})} />
                      </div>
                 </div>
             </div>
@@ -376,7 +393,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 <td className="border-r border-black p-0 bg-gray-50 print:bg-gray-100 relative">
                                     <InputCell 
                                         value={row.subject} 
-                                        onChange={(e: any) => {
+                                        onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].subject = e.target.value.toUpperCase();
                                             setPerformanceData(newData);
@@ -398,7 +415,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 {/* 1º ANO */}
                                 {row.g1.map((val, cIdx) => (
                                     <td key={`g1-${cIdx}`} className="border-r border-black p-0">
-                                        <InputCell value={val} onChange={(e: any) => {
+                                        <InputCell value={val} onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].g1[cIdx] = e.target.value;
                                             setPerformanceData(newData);
@@ -409,7 +426,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 {/* 2º ANO */}
                                 {row.g2.map((val, cIdx) => (
                                     <td key={`g2-${cIdx}`} className="border-r border-black p-0">
-                                        <InputCell value={val} onChange={(e: any) => {
+                                        <InputCell value={val} onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].g2[cIdx] = e.target.value;
                                             setPerformanceData(newData);
@@ -420,7 +437,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 {/* 3º ANO */}
                                 {row.g3.map((val, cIdx) => (
                                     <td key={`g3-${cIdx}`} className="border-r border-black p-0">
-                                        <InputCell value={val} onChange={(e: any) => {
+                                        <InputCell value={val} onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].g3[cIdx] = e.target.value;
                                             setPerformanceData(newData);
@@ -431,7 +448,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 {/* 4º ANO */}
                                 {row.g4.map((val, cIdx) => (
                                     <td key={`g4-${cIdx}`} className="border-r border-black p-0">
-                                        <InputCell value={val} onChange={(e: any) => {
+                                        <InputCell value={val} onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].g4[cIdx] = e.target.value;
                                             setPerformanceData(newData);
@@ -442,7 +459,7 @@ export const PerformanceIndicators: React.FC = () => {
                                 {/* 5º ANO */}
                                 {row.g5.map((val, cIdx) => (
                                     <td key={`g5-${cIdx}`} className={`p-0 ${cIdx < 2 ? 'border-r border-black' : ''}`}>
-                                        <InputCell value={val} onChange={(e: any) => {
+                                        <InputCell value={val} onChange={(e) => {
                                             const newData = [...performanceData];
                                             newData[rIdx].g5[cIdx] = e.target.value;
                                             setPerformanceData(newData);
@@ -484,7 +501,7 @@ export const PerformanceIndicators: React.FC = () => {
                                     <td className="border-r border-black p-0 bg-gray-50 print:bg-gray-100 relative">
                                         <InputCell 
                                             value={row.grade} 
-                                            onChange={(e: any) => {
+                                            onChange={(e) => {
                                                 const newData = [...movementData];
                                                 newData[idx].grade = e.target.value.toUpperCase();
                                                 setMovementData(newData);
@@ -501,16 +518,16 @@ export const PerformanceIndicators: React.FC = () => {
                                             <Trash2 className="h-3 w-3" />
                                         </button>
                                     </td>
-                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.initial} onChange={(e: any) => {
+                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.initial} onChange={(e) => {
                                         const newData = [...movementData]; newData[idx].initial = Number(e.target.value); setMovementData(newData);
                                     }} /></td>
-                                    <td className="border-r border-black p-0"><InputCell value={row.abandon} onChange={(e: any) => {
+                                    <td className="border-r border-black p-0"><InputCell value={row.abandon} onChange={(e) => {
                                         const newData = [...movementData]; newData[idx].abandon = e.target.value; setMovementData(newData);
                                     }} /></td>
-                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.transfer} onChange={(e: any) => {
+                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.transfer} onChange={(e) => {
                                         const newData = [...movementData]; newData[idx].transfer = Number(e.target.value); setMovementData(newData);
                                     }} /></td>
-                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.admitted} onChange={(e: any) => {
+                                    <td className="border-r border-black p-0"><InputCell type="number" value={row.admitted} onChange={(e) => {
                                         const newData = [...movementData]; newData[idx].admitted = Number(e.target.value); setMovementData(newData);
                                     }} /></td>
                                     <td className="p-1 font-bold bg-gray-50/50 print:bg-transparent">{row.current}</td>
@@ -553,8 +570,8 @@ export const PerformanceIndicators: React.FC = () => {
                     {/* Signatures */}
                     <div className="mt-4 p-4 flex justify-around items-end text-[10px]">
                         <div className="text-center w-1/2">
-                             <div className="mb-1 font-script text-xl transform -rotate-2 relative h-8">
-                                <InputCell value={headerInfo.director} onChange={(e: any) => setHeaderInfo({...headerInfo, director: e.target.value})} className="font-script text-center text-lg italic" />
+                             <div className="mb-1 font-script text-xl transform -rotate-2 relative h-8 flex items-end justify-center">
+                                <InputCell value={headerInfo.director} onChange={(e) => setHeaderInfo({...headerInfo, director: e.target.value.toUpperCase()})} placeholder="Nome do(a) Diretor(a)" className="font-script text-center text-lg italic w-full bg-transparent placeholder:text-gray-300" />
                              </div>
                              <div className="border-t border-black w-40 mx-auto pt-1">
                                 ASSINATURA DO(A) DIRETOR(A)
@@ -562,11 +579,11 @@ export const PerformanceIndicators: React.FC = () => {
                         </div>
                         <div className="text-center w-1/2 flex justify-center items-end gap-1">
                              <span>DATA</span>
-                             <InputCell value={headerInfo.dateDay} onChange={(e: any) => setHeaderInfo({...headerInfo, dateDay: e.target.value})} width="w-6" className="border-b border-black text-center" />
+                             <InputCell value={headerInfo.dateDay} onChange={(e) => setHeaderInfo({...headerInfo, dateDay: e.target.value})} width="w-6" className="border-b border-black text-center" />
                              <span>/</span>
-                             <InputCell value={headerInfo.dateMonth} onChange={(e: any) => setHeaderInfo({...headerInfo, dateMonth: e.target.value})} width="w-6" className="border-b border-black text-center" />
+                             <InputCell value={headerInfo.dateMonth} onChange={(e) => setHeaderInfo({...headerInfo, dateMonth: e.target.value})} width="w-6" className="border-b border-black text-center" />
                              <span>/</span>
-                             <InputCell value={headerInfo.dateYear} onChange={(e: any) => setHeaderInfo({...headerInfo, dateYear: e.target.value})} width="w-10" className="border-b border-black text-center" />
+                             <InputCell value={headerInfo.dateYear} onChange={(e) => setHeaderInfo({...headerInfo, dateYear: e.target.value})} width="w-10" className="border-b border-black text-center" />
                         </div>
                     </div>
                 </div>
