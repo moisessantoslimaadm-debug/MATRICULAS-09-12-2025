@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Navbar } from './components/Navbar';
-import { Home } from './pages/Home';
 import { Registration } from './pages/Registration';
 import { SchoolList } from './pages/SchoolList';
 import { Status } from './pages/Status';
@@ -9,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Reports } from './pages/Reports';
 import { NotFound } from './pages/NotFound';
 import { Login } from './pages/Login';
+import { ExternalApp } from './pages/ExternalApp'; // Importação do novo componente
 import { ChatAssistant } from './components/ChatAssistant';
 import { HashRouter, Routes, Route, useLocation, useNavigate } from './router';
 import { DataProvider, useData } from './contexts/DataContext';
@@ -77,29 +77,39 @@ const AppContent: React.FC = () => {
     const isAuth = sessionStorage.getItem('admin_auth') === 'true';
     
     // Lista de rotas públicas (acessíveis sem senha)
-    const publicRoutes = ['/login', '/registration', '/status', '/schools'];
-    const isPublicPath = publicRoutes.some(route => pathname.startsWith(route));
+    // Adicionada '/external' como pública (ou remova daqui se quiser que seja restrita)
+    const publicRoutes = ['/', '/login', '/registration', '/status', '/schools', '/external'];
+    
+    // Verifica se o caminho atual começa com alguma rota pública
+    const isPublicPath = publicRoutes.some(route => 
+        pathname === route || pathname.startsWith(route + '/')
+    );
 
     if (!isAuth) {
         // [VISITANTE]
-        // Se tentar acessar a Raiz ou Rota Restrita -> Manda para o Login (Hub)
-        if (pathname === '/' || !isPublicPath) {
-            navigate('/login');
+        // Se tentar acessar rota restrita -> Manda para a Raiz (Hub)
+        if (!isPublicPath) {
+            navigate('/');
         }
     } else {
         // [ADMIN]
-        // Se estiver logado e acessar a Raiz ou a tela de Login -> Manda direto para o Dashboard
+        // Se estiver logado e acessar a Raiz ou Login -> Manda direto para o Dashboard
         if (pathname === '/' || pathname === '/login') {
             navigate('/dashboard');
         }
     }
   }, [pathname, navigate]);
   
-  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login'];
+  // Adiciona '/external' aos caminhos válidos
+  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login', '/external'];
   const isNotFound = !validPaths.includes(pathname);
   
-  // Oculta Navbar e Footer na tela de Login para dar foco total
-  const isLoginPage = pathname === '/login';
+  // Oculta Navbar e Footer na tela de Login/Hub
+  const isLoginPage = pathname === '/' || pathname === '/login';
+  
+  // Oculta o Footer na tela externa para dar mais espaço ao App embutido
+  const isExternalPage = pathname === '/external';
+  
   const showLayout = !isNotFound && !isLoginPage;
 
   // Global Loading Screen
@@ -127,23 +137,25 @@ const AppContent: React.FC = () => {
         {showLayout && <Navbar />}
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/schools" element={<SchoolList />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/status" element={<Status />} />
             <Route path="/admin/data" element={<AdminData />} />
-            <Route path="/login" element={<Login />} />
+            {/* Nova Rota para o App Externo */}
+            <Route path="/external" element={<ExternalApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        {showLayout && <Footer />}
+        {showLayout && !isExternalPage && <Footer />}
       </div>
       
-      {/* Global Utilities */}
       <LogViewer />
-      {showLayout && <ChatAssistant />}
+      {!isNotFound && <ChatAssistant />}
     </>
   );
 };

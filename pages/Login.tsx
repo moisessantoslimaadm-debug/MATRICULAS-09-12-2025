@@ -53,7 +53,7 @@ export const Login: React.FC = () => {
         <div className="text-white space-y-6 md:pr-8 animate-in slide-in-from-left-8 duration-700 hidden md:block">
             <div>
                 <h1 className="text-4xl font-bold mb-2">Portal da Educação</h1>
-                <p className="text-blue-100 text-lg">Bem-vindo ao sistema de matrícula digital de {MUNICIPALITY_NAME}.</p>
+                <p className="text-blue-100 text-lg">Bem-vindo ao sistema de matrícula digital de {MUNICIPALITY_NAME}. Selecione o serviço desejado:</p>
             </div>
             
             <div className="space-y-4">

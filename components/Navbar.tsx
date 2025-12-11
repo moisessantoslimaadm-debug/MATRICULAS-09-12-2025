@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from '../router';
-import { GraduationCap, Menu, X, Database, LayoutDashboard, CloudCheck, BarChart3, Lock } from 'lucide-react';
+import { GraduationCap, Menu, X, Database, LayoutDashboard, CloudCheck, BarChart3, Lock, LayoutGrid } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,8 +24,8 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            {/* O logo redireciona para Dashboard (se logado) ou para Login (se não logado) */}
-            <Link to={isAuthenticated ? "/dashboard" : "/login"} className="flex-shrink-0 flex items-center gap-2">
+            {/* O logo redireciona para Dashboard (se logado) ou para Raiz/Hub (se não logado) */}
+            <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center gap-2">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
@@ -33,11 +33,17 @@ export const Navbar: React.FC = () => {
             </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {/* Links Visíveis para Todos */}
             <Link to="/schools" className={isActive('/schools')}>Escolas</Link>
             <Link to="/registration" className={isActive('/registration')}>Matrícula</Link>
             <Link to="/status" className={isActive('/status')}>Protocolo</Link>
+            
+            {/* Novo Link para o App Externo */}
+            <Link to="/external" className={`${isActive('/external')} flex items-center gap-1.5`}>
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden lg:inline">Portal</span> Extra
+            </Link>
 
             {/* Links Restritos (Apenas Admin) */}
             {isAuthenticated && (
@@ -61,9 +67,9 @@ export const Navbar: React.FC = () => {
                 <span className="text-[10px] font-bold text-green-700 uppercase tracking-wide">Salvo</span>
              </div>
              
-             {/* Admin Login Shortcut */}
+             {/* Admin Login Shortcut - Aponta para raiz agora */}
              <Link 
-               to="/login" 
+               to="/" 
                className={`hidden md:flex p-2 rounded-full transition ${isAuthenticated ? 'text-blue-600 bg-blue-50 ring-2 ring-blue-100' : 'text-slate-400 hover:text-blue-600 hover:bg-slate-50'}`} 
                title={isAuthenticated ? "Logado como Admin" : "Acesso Administrativo"}
              >
@@ -90,6 +96,10 @@ export const Navbar: React.FC = () => {
             <Link to="/registration" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Realizar Matrícula</Link>
             <Link to="/status" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Consultar Protocolo</Link>
             
+            <Link to="/external" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" /> Portal Extra
+            </Link>
+
             {isAuthenticated && (
                 <>
                     <Link to="/dashboard" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
@@ -107,7 +117,7 @@ export const Navbar: React.FC = () => {
                 </>
             )}
             
-            <Link to="/login" onClick={toggleMenu} className={`block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${isAuthenticated ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-50'}`}>
+            <Link to="/" onClick={toggleMenu} className={`block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${isAuthenticated ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-50'}`}>
               <Lock className="h-4 w-4" />
               {isAuthenticated ? 'Painel Admin (Logado)' : 'Login Admin'}
             </Link>
