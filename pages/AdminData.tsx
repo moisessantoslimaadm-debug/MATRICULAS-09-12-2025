@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
@@ -6,7 +5,7 @@ import { useLog } from '../contexts/LogContext';
 import { useNavigate } from '../router';
 import { 
   FileSpreadsheet, Upload, Download, Search, ChevronLeft, ChevronRight, 
-  Trash2, Lock, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText
+  Trash2, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText, Lock
 } from 'lucide-react';
 import { RegistryStudent, School, SchoolType } from '../types';
 
@@ -24,7 +23,6 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, value, onC
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Performance Optimization: Only slice the first 50 results to prevent UI lag on large lists
   const filteredOptions = useMemo(() => {
      return options
         .filter(option => option.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -383,17 +381,11 @@ const AdminStudentFormModal: React.FC<AdminStudentFormModalProps> = ({ isOpen, s
 // --- MAIN COMPONENT ---
 
 export const AdminData: React.FC = () => {
-  const { schools, students, updateSchools, updateStudents, addStudent, removeStudent, resetData, lastBackupDate, registerBackup } = useData();
+  const { schools, students, updateSchools, updateStudents, addStudent, removeStudent } = useData();
   const { addToast } = useToast();
   const { addLog, setIsViewerOpen } = useLog(); 
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('admin_auth') === 'true';
-  });
-  const [passwordInput, setPasswordInput] = useState('');
   
   // View State
   const [activeTab, setActiveTab] = useState<'students' | 'schools' | 'classes'>('students');
@@ -420,23 +412,19 @@ export const AdminData: React.FC = () => {
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [isCreatingStudent, setIsCreatingStudent] = useState(false);
 
-  
-  // ... Login Handlers ...
-  const handleLogin = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (passwordInput === 'admin123' || passwordInput === '1234') {
-          setIsAuthenticated(true);
-          sessionStorage.setItem('admin_auth', 'true');
-          addToast('Acesso administrativo concedido.', 'success');
-      } else {
-          addToast('Senha incorreta.', 'error');
+  // --- Auth & Security ---
+  useEffect(() => {
+      // Dupla verificação: Se App.tsx falhar, este effect garante a expulsão
+      const isAuth = sessionStorage.getItem('admin_auth') === 'true';
+      if (!isAuth) {
+          navigate('/login');
       }
-  };
+  }, [navigate]);
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
     sessionStorage.removeItem('admin_auth');
-    setPasswordInput('');
+    addToast('Sessão encerrada.', 'info');
+    navigate('/login');
   };
 
   const schoolNames = useMemo(() => {
@@ -468,7 +456,6 @@ export const AdminData: React.FC = () => {
             const matchesStatus = statusFilter === 'Todos' || student.status === statusFilter;
             const matchesClass = classFilter === 'Todas' || student.className === classFilter;
             
-            // Enhanced Shift Filter Logic (Handling Nulls, Undefined, and Empty strings safely)
             const matchesShift = shiftFilter === 'Todos' || 
                                  (shiftFilter === 'ND' 
                                     ? (!student.shift || student.shift === '' || student.shift === '-') 
@@ -702,33 +689,6 @@ export const AdminData: React.FC = () => {
       link.click();
       document.body.removeChild(link);
   };
-
-  if (!isAuthenticated) {
-      return (
-          <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 max-w-md w-full animate-in zoom-in-95 duration-300">
-                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Lock className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">Área Restrita</h2>
-                  <p className="text-center text-slate-500 mb-8">Esta área é destinada apenas para gestores autorizados. Por favor, identifique-se.</p>
-                  <form onSubmit={handleLogin} className="space-y-4">
-                      <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Código de Acesso</label>
-                          <input 
-                              type="password" 
-                              autoFocus
-                              value={passwordInput}
-                              onChange={(e) => setPasswordInput(e.target.value)}
-                              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                          />
-                      </div>
-                      <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">Acessar Painel</button>
-                  </form>
-              </div>
-          </div>
-      );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">

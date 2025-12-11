@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -73,27 +72,25 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useData();
   
-  // --- LÓGICA DE PROTEÇÃO DE ROTAS (SECURITY GUARD) ---
+  // --- LÓGICA DE PROTEÇÃO DE ROTAS E DIRECIONAMENTO (SECURITY GUARD) ---
   useEffect(() => {
     const isAuth = sessionStorage.getItem('admin_auth') === 'true';
     
     // Lista de rotas públicas (acessíveis sem senha)
-    // O Login é a porta de entrada pública principal agora (Hub Híbrido)
     const publicRoutes = ['/login', '/registration', '/status', '/schools'];
-    
-    // Verifica se a rota atual começa com alguma das rotas públicas
     const isPublicPath = publicRoutes.some(route => pathname.startsWith(route));
 
     if (!isAuth) {
-        // Cenário 1: Usuário acessa a Raiz ('/') -> Manda para o Login (Hub)
-        if (pathname === '/') {
+        // [VISITANTE]
+        // Se tentar acessar a Raiz ou Rota Restrita -> Manda para o Login (Hub)
+        if (pathname === '/' || !isPublicPath) {
             navigate('/login');
-            return;
         }
-
-        // Cenário 2: Usuário tenta acessar rota restrita (ex: /dashboard) sem logar -> Manda para Login
-        if (!isPublicPath) {
-            navigate('/login');
+    } else {
+        // [ADMIN]
+        // Se estiver logado e acessar a Raiz ou a tela de Login -> Manda direto para o Dashboard
+        if (pathname === '/' || pathname === '/login') {
+            navigate('/dashboard');
         }
     }
   }, [pathname, navigate]);

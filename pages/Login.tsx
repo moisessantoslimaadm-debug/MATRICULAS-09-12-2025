@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from '../router';
 import { useToast } from '../contexts/ToastContext';
@@ -27,8 +26,8 @@ export const Login: React.FC = () => {
         
         addToast(`Bem-vindo ao Educa${MUNICIPALITY_NAME}!`, 'success');
         
-        // Redireciona diretamente para a gestão de dados, pois é o fluxo natural do admin
-        navigate('/admin/data'); 
+        // Redireciona para o Dashboard (Visão Geral)
+        navigate('/dashboard'); 
       } else {
         addToast('Usuário ou senha incorretos.', 'error');
         setIsLoading(false);

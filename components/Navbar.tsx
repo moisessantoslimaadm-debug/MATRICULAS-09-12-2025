@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from '../router';
 import { GraduationCap, Menu, X, Database, LayoutDashboard, CloudCheck, BarChart3, Lock } from 'lucide-react';
@@ -25,8 +24,8 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            {/* O logo vai para Home (que redireciona para Login se não logado) */}
-            <Link to="/" className="flex-shrink-0 flex items-center gap-2">
+            {/* O logo redireciona para Dashboard (se logado) ou para Login (se não logado) */}
+            <Link to={isAuthenticated ? "/dashboard" : "/login"} className="flex-shrink-0 flex items-center gap-2">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
@@ -35,11 +34,6 @@ export const Navbar: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
-            {/* Link Início só aparece se logado, pois não logado redireciona para Login */}
-            {isAuthenticated && (
-                <Link to="/" className={isActive('/')}>Início</Link>
-            )}
-            
             {/* Links Visíveis para Todos */}
             <Link to="/schools" className={isActive('/schools')}>Escolas</Link>
             <Link to="/registration" className={isActive('/registration')}>Matrícula</Link>
@@ -92,10 +86,6 @@ export const Navbar: React.FC = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {isAuthenticated && (
-                <Link to="/" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Início</Link>
-            )}
-            
             <Link to="/schools" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Escolas</Link>
             <Link to="/registration" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Realizar Matrícula</Link>
             <Link to="/status" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Consultar Protocolo</Link>
