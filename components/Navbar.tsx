@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from '../router';
-import { GraduationCap, Menu, X, Database, LayoutDashboard, CloudCheck, BarChart3, Lock, LayoutGrid } from 'lucide-react';
+import { GraduationCap, Menu, X, Database, LayoutDashboard, CloudCheck, BarChart3, Lock, LayoutGrid, TrendingUp } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +51,9 @@ export const Navbar: React.FC = () => {
                     <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
                     <Link to="/reports" className={`${isActive('/reports')} flex items-center gap-1.5`} title="Visualizar Relatórios e Estatísticas">
                        <BarChart3 className="h-4 w-4" /> Relatórios
+                    </Link>
+                    <Link to="/performance" className={`${isActive('/performance')} flex items-center gap-1.5`} title="Indicadores de Desempenho">
+                       <TrendingUp className="h-4 w-4" /> Indicadores
                     </Link>
                     <Link to="/admin/data" className={`${isActive('/admin/data')} flex items-center gap-1 border border-slate-200 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-slate-100`}>
                       <Database className="h-3 w-3" />
@@ -109,6 +112,10 @@ export const Navbar: React.FC = () => {
                     <Link to="/reports" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4" />
                       Relatórios
+                    </Link>
+                    <Link to="/performance" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Indicadores
                     </Link>
                     <Link to="/admin/data" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 flex items-center gap-2">
                       <Database className="h-4 w-4" />

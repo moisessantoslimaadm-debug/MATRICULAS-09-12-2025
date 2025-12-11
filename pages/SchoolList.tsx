@@ -2,8 +2,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
-import { useSearchParams } from '../router';
-import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus } from 'lucide-react';
+import { useSearchParams, useNavigate } from '../router';
+import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus, FileText } from 'lucide-react';
 import { School, SchoolType, RegistryStudent } from '../types';
 
 // Declare Leaflet globally
@@ -124,6 +124,7 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
       setIsAdmin(sessionStorage.getItem('admin_auth') === 'true');
@@ -157,6 +158,10 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
     if (s.includes('matutino')) return 'Manhã';
     if (s.includes('vespertino')) return 'Tarde';
     return shift;
+  };
+
+  const handleOpenPerformance = (studentId: string) => {
+      navigate(`/performance?studentId=${studentId}`);
   };
 
   return (
@@ -214,8 +219,8 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
           {filteredStudents.length > 0 ? (
             <div className="grid gap-3">
               {filteredStudents.map(student => (
-                <div key={student.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <div>
+                <div key={student.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group">
+                  <div className="flex-1">
                     <h4 className="font-bold text-slate-800">{student.name}</h4>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-slate-500">
                        <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">CPF: {student.cpf || '-'}</span>
@@ -230,23 +235,38 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
                         </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {student.transportRequest && (
-                        <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold" title="Transporte">
-                            🚌
+                  
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-2">
+                        {student.transportRequest && (
+                            <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold" title="Transporte">
+                                🚌
+                            </span>
+                        )}
+                        {student.specialNeeds && (
+                            <span className="bg-pink-100 text-pink-700 px-2 py-1 rounded text-xs font-bold" title="AEE">
+                                ♿
+                            </span>
+                        )}
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                            student.status === 'Matriculado' ? 'bg-green-100 text-green-700' : 
+                            student.status === 'Pendente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                        {student.status}
                         </span>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    {isAdmin && (
+                        <button
+                            onClick={() => handleOpenPerformance(student.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs font-bold transition whitespace-nowrap mt-2 sm:mt-0"
+                            title="Gerar Boletim / Indicadores"
+                        >
+                            <FileText className="h-3.5 w-3.5" />
+                            Boletim
+                        </button>
                     )}
-                    {student.specialNeeds && (
-                        <span className="bg-pink-100 text-pink-700 px-2 py-1 rounded text-xs font-bold" title="AEE">
-                            ♿
-                        </span>
-                    )}
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                        student.status === 'Matriculado' ? 'bg-green-100 text-green-700' : 
-                        student.status === 'Pendente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {student.status}
-                    </span>
                   </div>
                 </div>
               ))}

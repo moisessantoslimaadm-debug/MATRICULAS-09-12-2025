@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from '../router';
 import { useToast } from '../contexts/ToastContext';
-import { GraduationCap, Lock, User, ArrowRight, Loader2, ShieldCheck, FileText, Search, School } from 'lucide-react';
+import { GraduationCap, Lock, User, ArrowRight, Loader2, ShieldCheck, FileText, Search, School, LayoutGrid } from 'lucide-react';
 import { MUNICIPALITY_NAME } from '../constants';
 
 export const Login: React.FC = () => {
@@ -91,6 +91,18 @@ export const Login: React.FC = () => {
                         </div>
                         <ArrowRight className="h-5 w-5 ml-auto text-white/50 group-hover:translate-x-1 transition" />
                     </Link>
+
+                    {/* Novo Botão para Portal Extra */}
+                    <Link to="/external" className="bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl flex items-center gap-4 transition group backdrop-blur-sm shadow-lg">
+                        <div className="bg-purple-500/20 p-3 rounded-lg text-purple-300 group-hover:text-purple-200 group-hover:bg-purple-500/30 transition border border-purple-500/30">
+                            <LayoutGrid className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg">Portal Extra</h3>
+                            <p className="text-sm text-blue-100 opacity-80">Acesse sistemas complementares</p>
+                        </div>
+                        <ArrowRight className="h-5 w-5 ml-auto text-white/50 group-hover:translate-x-1 transition" />
+                    </Link>
                 </div>
             </div>
         </div>
@@ -164,7 +176,7 @@ export const Login: React.FC = () => {
           {/* Footer Mobile Public Links */}
           <div className="md:hidden border-t border-slate-100 p-4 bg-slate-50">
              <p className="text-xs font-bold text-slate-400 uppercase text-center mb-3">Acesso Público</p>
-             <div className="grid grid-cols-3 gap-2 text-center">
+             <div className="grid grid-cols-2 gap-2 text-center">
                 <Link to="/registration" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
                     <div className="bg-green-100 p-1.5 rounded-full text-green-600"><FileText className="h-4 w-4"/></div>
                     <span className="text-[10px] font-bold text-slate-600">Matrícula</span>
@@ -176,6 +188,10 @@ export const Login: React.FC = () => {
                 <Link to="/schools" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
                     <div className="bg-indigo-100 p-1.5 rounded-full text-indigo-600"><School className="h-4 w-4"/></div>
                     <span className="text-[10px] font-bold text-slate-600">Escolas</span>
+                </Link>
+                <Link to="/external" className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white transition">
+                    <div className="bg-purple-100 p-1.5 rounded-full text-purple-600"><LayoutGrid className="h-4 w-4"/></div>
+                    <span className="text-[10px] font-bold text-slate-600">Portal Extra</span>
                 </Link>
              </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { MUNICIPALITY_NAME } from '../constants';
 import { School } from '../types';
@@ -13,6 +12,7 @@ Informações importantes sobre o processo:
 - Documentos: Certidão de Nascimento/RG, CPF, Comprovante de Residência, Cartão de Vacinação.
 - Alunos com deficiência devem apresentar laudo médico.
 - O sistema permite escolher 3 escolas de preferência.
+- O portal conta com uma área de "Portal Extra" no menu ou na tela inicial, onde é possível acessar sistemas complementares ou legados (apps externos).
 `;
 
 let chatSession: Chat | null = null;

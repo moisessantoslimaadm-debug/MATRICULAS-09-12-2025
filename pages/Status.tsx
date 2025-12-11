@@ -1,7 +1,7 @@
 
-import React, { useState, useMemo } from 'react';
-import { useSearchParams, Link } from '../router';
-import { CheckCircle, FileText, Search, UserCheck, AlertCircle, Bus, School, Hash, Filter, ArrowUpDown, ArrowUp, ArrowDown, Printer } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams, Link, useNavigate } from '../router';
+import { CheckCircle, FileText, Search, UserCheck, AlertCircle, Bus, School, Hash, Filter, ArrowUpDown, ArrowUp, ArrowDown, Printer, TrendingUp } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { RegistryStudent } from '../types';
 
@@ -30,6 +30,7 @@ export const Status: React.FC = () => {
   const [searchParams] = useSearchParams();
   const isSuccess = searchParams.get('success') === 'true';
   const [activeTab, setActiveTab] = useState<'protocol' | 'student'>('protocol');
+  const navigate = useNavigate();
   
   // Protocol Search State
   const [protocolInput, setProtocolInput] = useState('');
@@ -43,6 +44,12 @@ export const Status: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('Todos');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  // Admin Check
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+      setIsAdmin(sessionStorage.getItem('admin_auth') === 'true');
+  }, []);
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Allow free typing to support Protocols/IDs which might not follow CPF format
@@ -372,6 +379,19 @@ export const Status: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
+                                
+                                {/* Action Footer (Admin Only) */}
+                                {isAdmin && student.status === 'Matriculado' && (
+                                    <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-end print:hidden">
+                                        <button 
+                                            onClick={() => navigate(`/performance?studentId=${student.id}`)}
+                                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition"
+                                        >
+                                            <TrendingUp className="h-4 w-4" />
+                                            Ver Boletim / Indicadores
+                                        </button>
+                                    </div>
+                                )}
                            </div>
                         ))}
                     </div>

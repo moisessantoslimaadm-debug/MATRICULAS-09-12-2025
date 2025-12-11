@@ -66,6 +66,25 @@ export interface ChatMessage {
   isLoading?: boolean;
 }
 
+// Data structures for Performance Table
+export type PerformanceRow = {
+  subject: string;
+  g1: string[];
+  g2: string[];
+  g3: string[];
+  g4: string[];
+  g5: string[];
+};
+
+export type MovementRow = {
+  grade: string;
+  initial: number;
+  abandon: number | string;
+  transfer: number;
+  admitted: number;
+  current: number;
+};
+
 // Updated interface for data extracted from PDF
 export interface RegistryStudent {
   id: string; // ID único do aluno
@@ -88,4 +107,8 @@ export interface RegistryStudent {
   guardianName?: string; // Nome do Responsável
   guardianContact?: string; // Telefone do Responsável
   guardianCpf?: string; // CPF do Responsável
+  
+  // New fields for Individual Performance Report
+  performanceHistory?: PerformanceRow[];
+  movementHistory?: MovementRow[];
 }

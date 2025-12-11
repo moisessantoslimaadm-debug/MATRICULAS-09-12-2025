@@ -4,8 +4,9 @@ import { useToast } from '../contexts/ToastContext';
 import { 
   BarChart3, PieChart as PieIcon, Printer, Download, Filter, 
   School as SchoolIcon, Users, HeartPulse, Bus, 
-  TrendingUp, RefreshCw, Layers, Search
+  TrendingUp, RefreshCw, Layers, Search, ArrowRight, FileSpreadsheet
 } from 'lucide-react';
+import { Link } from '../router';
 import { SchoolType } from '../types';
 
 // --- Lightweight SVG Chart Components ---
@@ -305,6 +306,22 @@ export const Reports: React.FC = () => {
                      <h1 className="text-2xl font-bold uppercase">Secretaria Municipal de Educação</h1>
                      <p className="text-sm">Relatório Gerencial de Matrículas</p>
                      <p className="text-xs mt-1">Gerado em: {new Date().toLocaleDateString()} às {new Date().toLocaleTimeString()}</p>
+                </div>
+
+                {/* --- NEW FEATURE BANNER --- */}
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 mb-8 text-white shadow-lg print:hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
+                            <FileSpreadsheet className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold">Novo: Gerador de Indicadores Oficiais</h3>
+                            <p className="text-indigo-100 text-sm">Crie e imprima o quadro de desempenho e movimento da matrícula conforme modelo oficial da secretaria.</p>
+                        </div>
+                    </div>
+                    <Link to="/performance" className="whitespace-nowrap bg-white text-indigo-600 px-6 py-3 rounded-lg font-bold hover:bg-indigo-50 transition shadow-sm flex items-center gap-2">
+                        Acessar Ferramenta <ArrowRight className="h-4 w-4" />
+                    </Link>
                 </div>
 
                 {/* Navigation Tabs */}

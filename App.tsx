@@ -6,9 +6,10 @@ import { Status } from './pages/Status';
 import { AdminData } from './pages/AdminData';
 import { Dashboard } from './pages/Dashboard';
 import { Reports } from './pages/Reports';
+import { PerformanceIndicators } from './pages/PerformanceIndicators'; // Importação
 import { NotFound } from './pages/NotFound';
 import { Login } from './pages/Login';
-import { ExternalApp } from './pages/ExternalApp'; // Importação do novo componente
+import { ExternalApp } from './pages/ExternalApp';
 import { ChatAssistant } from './components/ChatAssistant';
 import { HashRouter, Routes, Route, useLocation, useNavigate } from './router';
 import { DataProvider, useData } from './contexts/DataContext';
@@ -77,7 +78,6 @@ const AppContent: React.FC = () => {
     const isAuth = sessionStorage.getItem('admin_auth') === 'true';
     
     // Lista de rotas públicas (acessíveis sem senha)
-    // Adicionada '/external' como pública (ou remova daqui se quiser que seja restrita)
     const publicRoutes = ['/', '/login', '/registration', '/status', '/schools', '/external'];
     
     // Verifica se o caminho atual começa com alguma rota pública
@@ -100,8 +100,8 @@ const AppContent: React.FC = () => {
     }
   }, [pathname, navigate]);
   
-  // Adiciona '/external' aos caminhos válidos
-  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login', '/external'];
+  // Adiciona '/performance' aos caminhos válidos
+  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login', '/external', '/performance'];
   const isNotFound = !validPaths.includes(pathname);
   
   // Oculta Navbar e Footer na tela de Login/Hub
@@ -142,11 +142,11 @@ const AppContent: React.FC = () => {
             
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/performance" element={<PerformanceIndicators />} /> {/* Nova Rota */}
             <Route path="/schools" element={<SchoolList />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/status" element={<Status />} />
             <Route path="/admin/data" element={<AdminData />} />
-            {/* Nova Rota para o App Externo */}
             <Route path="/external" element={<ExternalApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
