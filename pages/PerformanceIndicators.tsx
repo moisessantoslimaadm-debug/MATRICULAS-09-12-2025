@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { Printer, ArrowLeft, TrendingUp, Save, Eraser, Calculator, UserCheck, School as SchoolIcon, Plus, Trash2 } from 'lucide-react';
-import { Link, useSearchParams, useNavigate } from '../router';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Printer, ArrowLeft, TrendingUp, Save, Eraser, Calculator, UserCheck, Plus, Trash2, Loader2 } from 'lucide-react';
+import { useSearchParams, useNavigate } from '../router';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
 import { PerformanceRow, MovementRow, RegistryStudent, PerformanceHeader } from '../types';
@@ -29,7 +29,7 @@ const INITIAL_HEADER: PerformanceHeader = {
     unit: 'II TRIMESTRE',
     year: new Date().getFullYear() + 1,
     shift: '',
-    director: '',
+    director: '', // Nome vazio por padrão conforme solicitado
     coordinator: 'DABRINA SENA GOMES MOURA FIGUEREDO',
     dateDay: new Date().getDate().toString().padStart(2, '0'),
     dateMonth: (new Date().getMonth() + 1).toString().padStart(2, '0'),
@@ -69,10 +69,10 @@ export const PerformanceIndicators: React.FC = () => {
   const { schools, students, updateStudents } = useData();
   const { addToast } = useToast();
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const studentId = params.get('studentId');
   
   const [currentStudent, setCurrentStudent] = useState<RegistryStudent | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Local State
   const [headerInfo, setHeaderInfo] = useState<PerformanceHeader>(INITIAL_HEADER);
@@ -141,6 +141,7 @@ export const PerformanceIndicators: React.FC = () => {
           return;
       }
 
+      setIsSaving(true);
       const updatedStudent: RegistryStudent = {
           ...currentStudent,
           performanceHistory: performanceData,
@@ -151,8 +152,13 @@ export const PerformanceIndicators: React.FC = () => {
 
       try {
           await updateStudents([updatedStudent]);
-          addToast("Boletim salvo com sucesso!", 'success');
+          // Short delay to show the spinner/feedback
+          setTimeout(() => {
+             setIsSaving(false);
+             addToast("Boletim salvo com sucesso!", 'success');
+          }, 500);
       } catch (error) {
+          setIsSaving(false);
           addToast("Erro ao salvar dados.", 'error');
           console.error(error);
       }
@@ -244,8 +250,13 @@ export const PerformanceIndicators: React.FC = () => {
                         <Calculator className="h-4 w-4" /> Calcular
                     </button>
                     {currentStudent && (
-                        <button onClick={handleSaveToStudent} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-sm">
-                            <Save className="h-4 w-4" /> Salvar Alterações
+                        <button 
+                            onClick={handleSaveToStudent} 
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-sm disabled:opacity-70 disabled:cursor-wait"
+                        >
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                         </button>
                     )}
                     <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-sm">

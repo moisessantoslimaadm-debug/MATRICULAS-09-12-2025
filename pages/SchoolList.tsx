@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
 import { useSearchParams, useNavigate } from '../router';
-import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus, FileText } from 'lucide-react';
+import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus, TrendingUp } from 'lucide-react';
 import { School, SchoolType, RegistryStudent } from '../types';
 
 // Declare Leaflet globally
@@ -263,7 +263,7 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
                             className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs font-bold transition whitespace-nowrap mt-2 sm:mt-0"
                             title="Gerar Boletim / Indicadores"
                         >
-                            <FileText className="h-3.5 w-3.5" />
+                            <TrendingUp className="h-3.5 w-3.5" />
                             Boletim
                         </button>
                     )}
