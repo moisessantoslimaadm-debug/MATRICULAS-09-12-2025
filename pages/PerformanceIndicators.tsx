@@ -39,7 +39,7 @@ export const PerformanceIndicators: React.FC = () => {
     unit: 'II TRIMESTRE',
     year: new Date().getFullYear() + 1,
     shift: '',
-    director: 'LAISE SOUZA ALMEIDA',
+    director: '',
     coordinator: 'DABRINA SENA GOMES MOURA FIGUEREDO',
     dateDay: new Date().getDate().toString().padStart(2, '0'),
     dateMonth: (new Date().getMonth() + 1).toString().padStart(2, '0'),
@@ -553,13 +553,12 @@ export const PerformanceIndicators: React.FC = () => {
                     {/* Signatures */}
                     <div className="mt-4 p-4 flex justify-around items-end text-[10px]">
                         <div className="text-center w-1/2">
-                             <div className="mb-1 font-script text-xl transform -rotate-2 relative">
+                             <div className="mb-1 font-script text-xl transform -rotate-2 relative h-8">
                                 <InputCell value={headerInfo.director} onChange={(e: any) => setHeaderInfo({...headerInfo, director: e.target.value})} className="font-script text-center text-lg italic" />
                              </div>
                              <div className="border-t border-black w-40 mx-auto pt-1">
-                                ASSINATURA CARIMBO DO(A) DIRETOR(A)
+                                ASSINATURA DO(A) DIRETOR(A)
                              </div>
-                             <div className="text-[9px]">Decreto 088 de 20/06/2024</div>
                         </div>
                         <div className="text-center w-1/2 flex justify-center items-end gap-1">
                              <span>DATA</span>
