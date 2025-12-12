@@ -69,6 +69,7 @@ const InputCell = React.memo(({
 export const PerformanceIndicators: React.FC = () => {
   const { schools, students, updateStudents } = useData();
   const { addToast } = useToast();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const studentId = params.get('studentId');
   
@@ -119,7 +120,13 @@ export const PerformanceIndicators: React.FC = () => {
   }, [studentId, students]);
 
   const handlePrint = () => {
+    // Muda o título temporariamente para que o arquivo PDF salvo tenha um nome útil
+    const originalTitle = document.title;
+    if (currentStudent) {
+        document.title = `Boletim_${currentStudent.name.replace(/\s+/g, '_')}_${headerInfo.year}`;
+    }
     window.print();
+    document.title = originalTitle;
   };
 
   const handleClear = () => {
@@ -235,7 +242,7 @@ export const PerformanceIndicators: React.FC = () => {
         <div className="flex flex-col gap-4 mb-6 print:hidden">
             <div className="flex justify-between items-center">
                 <div>
-                    <button onClick={() => window.history.back()} className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-1 transition text-sm">
+                    <button onClick={() => navigate(-1)} className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-1 transition text-sm">
                         <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
                     </button>
                     <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">

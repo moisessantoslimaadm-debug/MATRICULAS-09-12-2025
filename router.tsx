@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 
-const RouterContext = createContext<{ path: string; navigate: (path: string) => void }>({
+// Update context type to accept string (path) or number (history delta)
+const RouterContext = createContext<{ path: string; navigate: (to: string | number) => void }>({
   path: window.location.hash.slice(1) || '/',
   navigate: () => {},
 });
@@ -72,8 +73,12 @@ export function HashRouter({ children }: { children?: React.ReactNode }) {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const navigate = (newPath: string) => {
-    window.location.hash = newPath;
+  const navigate = (to: string | number) => {
+    if (typeof to === 'number') {
+      window.history.go(to);
+    } else {
+      window.location.hash = to;
+    }
   };
 
   return (
