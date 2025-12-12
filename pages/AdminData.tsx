@@ -274,7 +274,7 @@ const AdminStudentFormModal: React.FC<AdminStudentFormModalProps> = ({ isOpen, s
           <h3 className="text-xl font-bold text-slate-900">{student?.id.startsWith('manual') || student?.id.startsWith('new') ? 'Novo Aluno' : 'Editar Aluno'}</h3>
           <button onClick={onClose}><X className="h-5 w-5 text-slate-500" /></button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 pb-40">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-1">Nome Completo</label>

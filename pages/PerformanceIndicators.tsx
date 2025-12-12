@@ -55,6 +55,7 @@ const InputCell = React.memo(({
     type?: "text" | "number"
 }) => (
     <input 
+      autoComplete="off"
       type={type}
       value={value ?? ''}
       onChange={onChange}
