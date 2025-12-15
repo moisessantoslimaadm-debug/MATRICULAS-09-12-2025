@@ -1,10 +1,9 @@
-
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
-import { Link } from '../router';
+import { Link, useNavigate } from '../router';
 import { 
   Users, School, AlertTriangle, Bus, TrendingUp, PieChart, 
-  Activity, CheckCircle, Clock, Baby, GraduationCap, Info, Map as MapIcon, Save, Download
+  Activity, CheckCircle, Clock, Baby, GraduationCap, Info, Map as MapIcon, Save, Download, ArrowRight, Eye, AlertCircle
 } from 'lucide-react';
 import { SchoolType } from '../types';
 
@@ -176,6 +175,7 @@ const StudentDensityMap: React.FC = () => {
             heatLayerRef.current = null;
         }
 
+        // Defensive check: Ensure L.heatLayer is available (it comes from an external script)
         if (typeof L.heatLayer === 'function' && points.length > 0) {
             try {
                 heatLayerRef.current = L.heatLayer(points, {
@@ -188,7 +188,7 @@ const StudentDensityMap: React.FC = () => {
                 });
                 heatLayerRef.current.addTo(map);
             } catch (err) {
-                console.warn("Could not add heatmap layer", err);
+                console.warn("Could not add heatmap layer. Library might not be loaded.", err);
             }
         }
 
@@ -280,6 +280,7 @@ const StudentDensityMap: React.FC = () => {
 
 export const Dashboard: React.FC = () => {
   const { students, schools, lastBackupDate } = useData();
+  const navigate = useNavigate();
 
   // --- Calculations ---
 
@@ -339,6 +340,18 @@ export const Dashboard: React.FC = () => {
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([name, count]) => ({ name, count }));
+  }, [students]);
+
+  // Risk Monitoring Logic
+  const studentsAtRisk = useMemo(() => {
+    return students.filter(s => {
+        const notes = s.teacherNotes || [];
+        const alerts = notes.filter(n => n.type === 'Alerta' || n.type === 'Ocorrência');
+        return alerts.length > 0;
+    }).map(s => ({
+        ...s,
+        alertCount: (s.teacherNotes || []).filter(n => n.type === 'Alerta' || n.type === 'Ocorrência').length
+    })).sort((a, b) => b.alertCount - a.alertCount).slice(0, 5);
   }, [students]);
 
   const totalCapacity = useMemo(() => schools.reduce((acc, s) => acc + (s.availableSlots || 0), 0), [schools]);
@@ -522,36 +535,57 @@ export const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Inclusion Stats */}
+            {/* Risk / Attention Card (NEW) */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
                 <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
-                    <Baby className="h-5 w-5 text-pink-500" />
-                    Indicadores de Inclusão
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    Monitoramento de Risco (Alertas)
                 </h2>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                    <div className="bg-pink-50 rounded-xl p-5 border border-pink-100 flex flex-col justify-center items-center text-center hover:bg-pink-100/50 transition duration-300">
-                        <div className="p-3 bg-white rounded-full mb-3 shadow-sm">
-                            <Activity className="h-6 w-6 text-pink-500" />
+                <div className="flex-1">
+                    {studentsAtRisk.length > 0 ? (
+                        <div className="space-y-3">
+                            {studentsAtRisk.map((student) => (
+                                <div key={student.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-100 hover:bg-orange-100 transition">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="bg-white p-1.5 rounded-full text-orange-500 shrink-0">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-slate-800 truncate">{student.name}</p>
+                                            <p className="text-xs text-slate-500 truncate">{student.school}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-bold bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">
+                                            {student.alertCount} ocorrências
+                                        </span>
+                                        <button 
+                                            onClick={() => navigate(`/student/monitoring?id=${student.id}`)}
+                                            className="p-1 text-slate-400 hover:text-blue-600 transition"
+                                            title="Ver Detalhes"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <span className="text-4xl font-bold text-pink-700 mb-1">{specialNeedsCount}</span>
-                        <span className="text-sm font-medium text-pink-900">Alunos com Deficiência (AEE)</span>
-                        <span className="text-xs text-pink-600 mt-2">
-                             {((specialNeedsCount / totalStudents) * 100 || 0).toFixed(1)}% da rede
-                        </span>
-                    </div>
-
-                     <div className="bg-emerald-50 rounded-xl p-5 border border-emerald-100 flex flex-col justify-center items-center text-center hover:bg-emerald-100/50 transition duration-300">
-                        <div className="p-3 bg-white rounded-full mb-3 shadow-sm">
-                            <CheckCircle className="h-6 w-6 text-emerald-500" />
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-400 py-8">
+                            <CheckCircle className="h-10 w-10 mb-2 opacity-20 text-green-500" />
+                            <p>Nenhum aluno em situação de alerta.</p>
                         </div>
-                        <span className="text-4xl font-bold text-emerald-700 mb-1">{statusStats.matriculado}</span>
-                        <span className="text-sm font-medium text-emerald-900">Matrículas Efetivadas</span>
-                        <span className="text-xs text-emerald-600 mt-2">
-                            Processo concluído com sucesso
-                        </span>
-                    </div>
+                    )}
                 </div>
+                
+                {studentsAtRisk.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+                        <Link to="/admin/data" className="text-xs font-bold text-blue-600 hover:underline flex items-center justify-center gap-1">
+                            Ver todos os alunos <ArrowRight className="h-3 w-3" />
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
       </div>

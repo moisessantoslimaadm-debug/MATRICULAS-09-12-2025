@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 
-// Update context type to accept string (path) or number (history delta)
+// Contexto agora aceita string (caminho) ou número (delta do histórico)
 const RouterContext = createContext<{ path: string; navigate: (to: string | number) => void }>({
   path: window.location.hash.slice(1) || '/',
   navigate: () => {},
@@ -20,7 +20,6 @@ export function useNavigate() {
 export function useSearchParams() {
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
-  // Return a dummy function for setSearchParams to prevent crashes during destructuring
   const setSearchParams = (newParams: any) => {
     console.warn("setSearchParams is not fully implemented in this lightweight router.");
   };

@@ -97,6 +97,22 @@ export type PerformanceHeader = {
   dateYear: string;
 };
 
+// --- NEW: Pedagogical Notes & Attendance ---
+export interface TeacherNote {
+    id: string;
+    date: string;
+    type: 'Elogio' | 'Alerta' | 'Ocorrência' | 'Pedagógico';
+    content: string;
+    author: string;
+}
+
+export interface AttendanceData {
+    totalSchoolDays: number;
+    presentDays: number;
+    justifiedAbsences: number;
+    unjustifiedAbsences: number;
+}
+
 // Updated interface for data extracted from PDF
 export interface RegistryStudent {
   id: string; // ID único do aluno
@@ -124,4 +140,8 @@ export interface RegistryStudent {
   performanceHistory?: PerformanceRow[];
   movementHistory?: MovementRow[];
   performanceHeader?: PerformanceHeader; // Persist header info
+  
+  // Monitoring Fields
+  teacherNotes?: TeacherNote[];
+  attendance?: AttendanceData;
 }

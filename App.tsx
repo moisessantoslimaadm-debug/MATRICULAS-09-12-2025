@@ -6,7 +6,8 @@ import { Status } from './pages/Status';
 import { AdminData } from './pages/AdminData';
 import { Dashboard } from './pages/Dashboard';
 import { Reports } from './pages/Reports';
-import { PerformanceIndicators } from './pages/PerformanceIndicators'; // Importação
+import { PerformanceIndicators } from './pages/PerformanceIndicators';
+import { StudentMonitoring } from './pages/StudentMonitoring';
 import { NotFound } from './pages/NotFound';
 import { Login } from './pages/Login';
 import { ExternalApp } from './pages/ExternalApp';
@@ -87,7 +88,7 @@ const AppContent: React.FC = () => {
 
     if (!isAuth) {
         // [VISITANTE]
-        // Se tentar acessar rota restrita -> Manda para a Raiz (Hub)
+        // Se tentar acessar rota restrita -> Manda para a Raiz (Hub de Login/Serviços)
         if (!isPublicPath) {
             navigate('/');
         }
@@ -100,9 +101,9 @@ const AppContent: React.FC = () => {
     }
   }, [pathname, navigate]);
   
-  // Adiciona '/performance' aos caminhos válidos
-  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login', '/external', '/performance'];
-  const isNotFound = !validPaths.includes(pathname);
+  const validPaths = ['/', '/dashboard', '/registration', '/schools', '/status', '/admin/data', '/reports', '/login', '/external', '/performance', '/student/monitoring'];
+  // Route check fix: allow paths that start with valid prefixes (for dynamic routes like /student/monitoring)
+  const isNotFound = !validPaths.some(p => pathname === p || pathname.startsWith(p + '?'));
   
   // Oculta Navbar e Footer na tela de Login/Hub
   const isLoginPage = pathname === '/' || pathname === '/login';
@@ -137,16 +138,18 @@ const AppContent: React.FC = () => {
         {showLayout && <Navbar />}
         <main className="flex-grow">
           <Routes>
+            {/* Login agora é a rota raiz */}
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/performance" element={<PerformanceIndicators />} /> {/* Nova Rota */}
+            <Route path="/performance" element={<PerformanceIndicators />} />
             <Route path="/schools" element={<SchoolList />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/status" element={<Status />} />
             <Route path="/admin/data" element={<AdminData />} />
+            <Route path="/student/monitoring" element={<StudentMonitoring />} />
             <Route path="/external" element={<ExternalApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

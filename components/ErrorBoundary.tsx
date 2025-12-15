@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
@@ -10,11 +10,14 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-  };
+export class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+    };
+  }
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
@@ -29,7 +32,6 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleReset = () => {
-    // Emergency data clear if data corruption is the cause
     if (window.confirm("Isso limpará os dados locais para tentar recuperar o sistema. Deseja continuar?")) {
       localStorage.clear();
       window.location.href = '/';
@@ -46,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Ops! Algo deu errado.</h1>
             <p className="text-slate-500 mb-6">
-              Ocorreu um erro inesperado na aplicação. Nossos engenheiros foram notificados (simulado).
+              Ocorreu um erro inesperado na aplicação.
             </p>
             
             <div className="bg-slate-50 p-4 rounded-lg text-left mb-6 overflow-hidden">

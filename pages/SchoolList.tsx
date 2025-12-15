@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
 import { useSearchParams, useNavigate } from '../router';
-import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus, TrendingUp } from 'lucide-react';
+import { MapPin, Search, School as SchoolIcon, Filter, Users, X, ChevronRight, Navigation, Layout, List, Map as MapIcon, GraduationCap, CheckCircle2, AlertCircle, Clock, Baby, ChevronLeft, Edit3, User, Plus, TrendingUp, Activity } from 'lucide-react';
 import { School, SchoolType, RegistryStudent } from '../types';
 
 // Declare Leaflet globally
@@ -258,14 +257,24 @@ const StudentListModal: React.FC<StudentListModalProps> = ({ school, students, i
                     
                     {/* Action Buttons */}
                     {isAdmin && (
-                        <button
-                            onClick={() => handleOpenPerformance(student.id)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs font-bold transition whitespace-nowrap mt-2 sm:mt-0"
-                            title="Gerar Boletim / Indicadores"
-                        >
-                            <TrendingUp className="h-3.5 w-3.5" />
-                            Boletim
-                        </button>
+                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                            <button
+                                onClick={() => navigate(`/student/monitoring?id=${student.id}`)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 rounded-lg text-xs font-bold transition whitespace-nowrap"
+                                title="Monitoramento de Risco e Diário de Bordo"
+                            >
+                                <Activity className="h-3.5 w-3.5" />
+                                Monitorar
+                            </button>
+                            <button
+                                onClick={() => handleOpenPerformance(student.id)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs font-bold transition whitespace-nowrap"
+                                title="Gerar Boletim / Indicadores"
+                            >
+                                <TrendingUp className="h-3.5 w-3.5" />
+                                Boletim
+                            </button>
+                        </div>
                     )}
                   </div>
                 </div>
