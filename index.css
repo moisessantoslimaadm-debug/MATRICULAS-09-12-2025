@@ -1,0 +1,51 @@
+/* Estilos Globais Personalizados */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Print Styles */
+@page {
+  size: auto;
+  margin: 5mm;
+}
+@media print {
+  nav, footer, .no-print, .chat-widget {
+    display: none !important;
+  }
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  .print-container {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+.print-only {
+  display: none;
+}
+
+/* Leaflet Custom Icon Style */
+.custom-div-icon {
+  background: transparent;
+  border: none;
+}

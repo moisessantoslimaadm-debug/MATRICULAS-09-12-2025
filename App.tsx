@@ -165,8 +165,8 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <LogProvider>
+    <LogProvider>
+      <ErrorBoundary>
         <ToastProvider>
           <DataProvider>
             <HashRouter>
@@ -174,8 +174,8 @@ const App: React.FC = () => {
             </HashRouter>
           </DataProvider>
         </ToastProvider>
-      </LogProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </LogProvider>
   );
 };
 

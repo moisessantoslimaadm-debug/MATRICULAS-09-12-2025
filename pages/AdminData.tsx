@@ -5,8 +5,8 @@ import { useLog } from '../contexts/LogContext';
 import { useNavigate } from '../router';
 import { 
   FileSpreadsheet, Upload, Download, Search, ChevronLeft, ChevronRight, 
-  Trash2, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText, Lock, TrendingUp,
-  Activity
+  Trash2, Edit3, LogOut, Bug, ChevronDown, Plus, X, FileText, TrendingUp,
+  Activity, ArrowUp, ArrowDown, ListFilter, SlidersHorizontal
 } from 'lucide-react';
 import { RegistryStudent, School, SchoolType } from '../types';
 
@@ -395,13 +395,14 @@ export const AdminData: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [schoolFilter, setSchoolFilter] = useState('Todas');
   const [classFilter, setClassFilter] = useState('Todas'); 
-  const [shiftFilter, setShiftFilter] = useState('Todos'); 
+  const [shiftFilter, setShiftFilter] = useState('Todos'); // New Shift Filter
   const [statusFilter, setStatusFilter] = useState('Todos'); 
+  const [transportFilter, setTransportFilter] = useState('Todos'); 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   
   // Sorting State
-  const [sortField, setSortField] = useState<'name' | 'cpf' | null>(null);
+  const [sortField, setSortField] = useState<'name' | 'cpf' | 'shift' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // School Management
@@ -457,12 +458,17 @@ export const AdminData: React.FC = () => {
             const matchesStatus = statusFilter === 'Todos' || student.status === statusFilter;
             const matchesClass = classFilter === 'Todas' || student.className === classFilter;
             
+            // Robust check for shift (insensitive case)
             const matchesShift = shiftFilter === 'Todos' || 
                                  (shiftFilter === 'ND' 
                                     ? (!student.shift || student.shift === '' || student.shift === '-') 
-                                    : student.shift === shiftFilter);
+                                    : (student.shift || '').toLowerCase() === shiftFilter.toLowerCase());
             
-            return matchesSearch && matchesSchool && matchesStatus && matchesClass && matchesShift;
+            // New Transport Filter Logic
+            const matchesTransport = transportFilter === 'Todos' || 
+                (transportFilter === 'Sim' ? !!student.transportRequest : !student.transportRequest);
+            
+            return matchesSearch && matchesSchool && matchesStatus && matchesClass && matchesShift && matchesTransport;
         });
     } else if (activeTab === 'schools') {
         return schools.filter(school => {
@@ -470,7 +476,7 @@ export const AdminData: React.FC = () => {
         });
     }
     return [];
-  }, [students, schools, activeTab, searchTerm, schoolFilter, statusFilter, classFilter, shiftFilter]);
+  }, [students, schools, activeTab, searchTerm, schoolFilter, statusFilter, classFilter, shiftFilter, transportFilter]);
 
   // --- Sorting Logic ---
   const sortedData = useMemo(() => {
@@ -493,6 +499,13 @@ export const AdminData: React.FC = () => {
                  if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
                  return 0;
             }
+            if (sortField === 'shift') {
+                const shiftA = valA.toLowerCase() || '';
+                const shiftB = valB.toLowerCase() || '';
+                return sortDirection === 'asc' 
+                    ? shiftA.localeCompare(shiftB) 
+                    : shiftB.localeCompare(shiftA);
+            }
             return 0;
         });
     }
@@ -508,7 +521,7 @@ export const AdminData: React.FC = () => {
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
 
-  const handleSort = (field: 'name' | 'cpf') => {
+  const handleSort = (field: 'name' | 'cpf' | 'shift') => {
       if (sortField === field) {
           setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
       } else {
@@ -630,7 +643,7 @@ export const AdminData: React.FC = () => {
   };
 
   const handleExportFiltered = () => {
-    if (filteredData.length === 0) {
+    if (sortedData.length === 0) {
         addToast("Nenhum registro para exportar com os filtros atuais.", 'warning');
         return;
     }
@@ -640,7 +653,8 @@ export const AdminData: React.FC = () => {
 
     if (activeTab === 'students') {
         headers = ["Nome", "CPF", "Nascimento", "Status", "Escola", "Turma", "Turno", "Deficiência", "Transporte", "Responsável", "Contato", "CPF Responsável"];
-        rows = (filteredData as RegistryStudent[]).map((item) => [
+        // Usa sortedData para garantir que o CSV respeite a ordenação da tela
+        rows = (sortedData as RegistryStudent[]).map((item) => [
             `"${item.name}"`,
             `"${item.cpf || ''}"`,
             `"${item.birthDate || ''}"`,
@@ -703,9 +717,9 @@ export const AdminData: React.FC = () => {
            <div className="flex gap-2">
                <button 
                  onClick={() => setIsViewerOpen(true)}
-                 className="px-4 py-2 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg font-medium transition flex items-center gap-2 border border-slate-200"
+                 className="px-4 py-2 text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg font-medium transition flex items-center gap-2"
                >
-                   <Bug className="h-4 w-4" /> Logs
+                   <Bug className="h-4 w-4" /> Visualizar Logs
                </button>
                <button onClick={handleLogout} className="px-4 py-2 text-sm bg-slate-200 hover:bg-slate-300 rounded-lg font-medium transition flex items-center gap-2">
                    <LogOut className="h-4 w-4" /> Sair
@@ -775,16 +789,31 @@ export const AdminData: React.FC = () => {
                             <option value="ND">Não definido / Vazio</option>
                         </select>
                    </div>
-                   <select 
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full lg:w-auto border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                    >
-                        <option value="Todos">Status</option>
-                        <option value="Matriculado">Matriculado</option>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Em Análise">Em Análise</option>
-                    </select>
+                   {/* New Transport Select */}
+                   <div className="w-full lg:w-40">
+                        <select
+                            value={transportFilter}
+                            onChange={(e) => setTransportFilter(e.target.value)}
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                        >
+                            <option value="Todos">Transporte: Todos</option>
+                            <option value="Sim">Com Transporte</option>
+                            <option value="Não">Sem Transporte</option>
+                        </select>
+                   </div>
+                   <div className="relative">
+                       <select 
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="w-full lg:w-auto border border-slate-300 rounded-lg pl-3 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white appearance-none cursor-pointer font-medium text-slate-700"
+                        >
+                            <option value="Todos">Status: Todos</option>
+                            <option value="Matriculado">Matriculado</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Análise">Em Análise</option>
+                        </select>
+                        <ListFilter className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                   </div>
                 </>
             )}
             <div className="flex gap-2 w-full lg:w-auto">
@@ -816,7 +845,7 @@ export const AdminData: React.FC = () => {
                 <button 
                     onClick={handleExportFiltered}
                     className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 flex items-center justify-center gap-2 transition"
-                    title="Exportar dados filtrados"
+                    title="Exportar dados filtrados e ordenados"
                 >
                     <Download className="h-4 w-4" /> <span className="hidden xl:inline">Exportar</span>
                 </button>
@@ -839,24 +868,34 @@ export const AdminData: React.FC = () => {
                     {activeTab === 'students' ? (
                         <tr>
                             <th 
-                                className="px-6 py-3 cursor-pointer hover:bg-slate-100 transition group"
+                                className={`px-6 py-3 cursor-pointer hover:bg-slate-100 transition group ${sortField === 'name' ? 'text-blue-700 bg-blue-50/50' : ''}`}
                                 onClick={() => handleSort('name')}
                             >
                                 <div className="flex items-center gap-1">
                                     Nome
+                                    {sortField === 'name' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 cursor-pointer hover:bg-slate-100 transition group"
+                                className={`px-6 py-3 cursor-pointer hover:bg-slate-100 transition group ${sortField === 'cpf' ? 'text-blue-700 bg-blue-50/50' : ''}`}
                                 onClick={() => handleSort('cpf')}
                             >
                                 <div className="flex items-center gap-1">
                                     CPF
+                                    {sortField === 'cpf' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                 </div>
                             </th>
                             <th className="px-6 py-3">Escola</th>
                             <th className="px-6 py-3">Turma</th>
-                            <th className="px-6 py-3">Turno</th>
+                            <th 
+                                className={`px-6 py-3 cursor-pointer hover:bg-slate-100 transition group ${sortField === 'shift' ? 'text-blue-700 bg-blue-50/50' : ''}`}
+                                onClick={() => handleSort('shift')}
+                            >
+                                <div className="flex items-center gap-1">
+                                    Turno
+                                    {sortField === 'shift' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                                </div>
+                            </th>
                             <th className="px-6 py-3">Status</th>
                             <th className="px-6 py-3 text-right">Ações</th>
                         </tr>
@@ -974,22 +1013,30 @@ export const AdminData: React.FC = () => {
                 <span>itens</span>
             </div>
             
-            <div className="flex items-center gap-4">
-                <div className="text-sm text-slate-500">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+                {activeTab === 'students' && (
+                    <>
+                        <span className="font-medium bg-slate-100 px-2 py-1 rounded">
+                            Total: <strong>{sortedData.length}</strong> alunos
+                        </span>
+                        <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
+                    </>
+                )}
+                <div className="text-slate-500">
                     Página {currentPage} de {totalPages || 1}
                 </div>
                 <div className="flex gap-2">
                     <button 
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="p-2 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                        className="p-2 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 transition"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
                     <button 
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="p-2 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                        className="p-2 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 transition"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>
