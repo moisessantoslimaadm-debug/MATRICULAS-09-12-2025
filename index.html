@@ -27,7 +27,7 @@
             },
           },
         },
-      }
+      };
     </script>
 
     <!-- System Polyfills -->
@@ -36,39 +36,41 @@
     </script>
     
     <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
-    "react-dom": "https://esm.sh/react-dom@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "dexie": "https://esm.sh/dexie@^4.2.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
-  }
-}
-</script>
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
+        "react-dom": "https://esm.sh/react-dom@^19.2.3",
+        "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+        "dexie": "https://esm.sh/dexie@^4.2.1",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "vite": "https://esm.sh/vite@^7.3.0",
+        "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+      }
+    }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased">
     <div id="root">
         <!-- Feedback de carregamento inicial -->
         <div style="height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f8fafc; color: #3b82f6;">
-            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
         </div>
     </div>
     <script type="module" src="/index.tsx"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   <script>
-  const SUPABASE_URL = "Chttps://fncmbfppccifpniwcaxu.supabase.co"
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuY21iZnBwY2NpZnBuaXdjYXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjY2MzIsImV4cCI6MjA4MTUwMjYzMn0.YN6XEzSH3XXX8ROtW7S-jstZgaTW2YaApP4YssFjTF0"
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = "https://fncmbfppccifpniwcaxu.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuY21iZnBwY2NpZnBuaXdjYXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjY2MzIsImV4cCI6MjA4MTUwMjYzMn0.YN6XEzSH3XXX8ROtW7S-jstZgaTW2YaApP4YssFjTF0";
 
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  )
+      // Criação do cliente Supabase
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  console.log("Supabase conectado com sucesso!")
-</script>
+      console.log("Supabase conectado com sucesso!");
+    </script>
+  </body>
+</html>
