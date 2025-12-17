@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   
   return {
+    base: './', // Define caminhos relativos para garantir que funcione no GitHub Pages
     plugins: [react()],
     define: {
       // Garante que process.env.API_KEY funcione no navegador
