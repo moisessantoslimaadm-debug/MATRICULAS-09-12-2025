@@ -14,11 +14,14 @@ interface State {
 }
 
 class ErrorBoundaryInner extends React.Component<InnerProps, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null
-  };
+  constructor(props: InnerProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null
+    };
+  }
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error, errorInfo: null };

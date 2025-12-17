@@ -262,6 +262,8 @@ export const Reports: React.FC = () => {
         }
     };
 
+    const showClearFilters = activeTab === 'individual' && (selectedSchoolId !== '' || gradeFilter !== 'Todas');
+
     return (
         <div className="min-h-screen bg-slate-50 py-8 print:bg-white print:py-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -276,14 +278,16 @@ export const Reports: React.FC = () => {
                         <p className="text-slate-600 mt-1">Análise detalhada da rede municipal de ensino.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                         <button 
-                            onClick={handleResetFilters}
-                            className="flex items-center gap-2 px-3 py-2 bg-white text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm font-medium"
-                            title="Limpar todos os filtros"
-                        >
-                            <RefreshCw className="h-4 w-4" />
-                            Limpar
-                        </button>
+                         {showClearFilters && (
+                            <button 
+                                onClick={handleResetFilters}
+                                className="flex items-center gap-2 px-3 py-2 bg-white text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm font-medium animate-in fade-in"
+                                title="Limpar todos os filtros"
+                            >
+                                <RefreshCw className="h-4 w-4" />
+                                Limpar
+                            </button>
+                         )}
                         <button 
                             onClick={handleExportCSV}
                             className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm font-medium"
@@ -473,28 +477,28 @@ export const Reports: React.FC = () => {
                                     </select>
                                 </div>
                             </div>
-                            <div className="w-full md:w-64">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Filtrar por Etapa</label>
-                                <div className="relative">
-                                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <select 
-                                        className="w-full pl-9 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white appearance-none cursor-pointer text-slate-700 font-medium"
-                                        value={gradeFilter}
-                                        onChange={(e) => setGradeFilter(e.target.value)}
-                                        disabled={!selectedSchoolId}
-                                    >
-                                        <option value="Todas">Todas as Etapas</option>
-                                        {/* Typical grades, could be dynamic based on data */}
-                                        <option value="Educação Infantil">Educação Infantil</option>
-                                        <option value="Fundamental I">Fundamental I</option>
-                                        <option value="Fundamental II">Fundamental II</option>
-                                    </select>
+                            {selectedSchoolId && (
+                                <div className="w-full md:w-64 animate-in fade-in slide-in-from-left-4">
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Filtrar por Etapa</label>
+                                    <div className="relative">
+                                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <select 
+                                            className="w-full pl-9 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white appearance-none cursor-pointer text-slate-700 font-medium"
+                                            value={gradeFilter}
+                                            onChange={(e) => setGradeFilter(e.target.value)}
+                                        >
+                                            <option value="Todas">Todas as Etapas</option>
+                                            <option value="Educação Infantil">Educação Infantil</option>
+                                            <option value="Fundamental I">Fundamental I</option>
+                                            <option value="Fundamental II">Fundamental II</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {selectedSchoolData ? (
-                            <div className="space-y-6">
+                            <div className="space-y-6 animate-in fade-in duration-300">
                                 {/* School Info Header */}
                                 <div className="bg-white rounded-2xl shadow-sm border-l-4 border-l-blue-600 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div>
